@@ -57,6 +57,7 @@ const InboxContent = () => {
 					{chats.map((item, index) => {
 						return (
 							<div
+								key={index}
 								className={`flex gap-4 py-[22px] ${
 									index !== chats.length - 1
 										? "border-b border-primary-gray"
