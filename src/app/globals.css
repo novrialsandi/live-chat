@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+	--color-primary-blue: #2f80ed;
+	--color-primary-darkGray: #4f4f4f;
+	--color-primary-gray: #828282;
+	--color-primary-lightGray: #e0e0e0;
+
+	--color-indicator-orange: #f8b76b;
+	--color-indicator-purple: #8785ff;
+	--color-indicator-red: #eb5757;
+	--color-indicator-yellow: #f2c94c;
+
+	--color-chats-cream: #fceed3;
+	--color-chats-softOrange: #e5a443;
+	--color-chats-softPurple: #9b51e0;
+	--color-chats-lightPurple: #eedcff;
+	--color-chats-lightBlue: #d2f2ea;
+	--color-chats-green: #43b78d;
+
+	--color-stickers-lightBlue: #e9f3ff;
+	--color-stickers-softPeach: #fdcf A4;
+	--color-stickers-softYellow: #f9e9c3;
+	--color-stickers-mint: #afebdb;
+	--color-stickers-lightGreen: #cbf1c2;
+	--color-stickers-lightLavender: #cfcef9;
+	--color-stickers-softPink: #f9e0fd;
+}
