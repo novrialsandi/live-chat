@@ -1,6 +1,7 @@
 import { Lato } from "next/font/google";
 import "./globals.css";
 import Layout from "@/lib/layout/Layout";
+import Quicks from "@/lib/components/Quicks";
 
 const lato = Lato({
 	subsets: ["latin"],
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
 		<html lang="en">
 			<body className={`${lato.variable} antialiased bg-[#333333]`}>
 				<Layout>{children}</Layout>
+				<Quicks />
 			</body>
 		</html>
 	);
