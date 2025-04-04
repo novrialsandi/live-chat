@@ -7,6 +7,7 @@ import fetchApi from "../../api/fetchApi";
 import AccordionItem from "../AccordionItem";
 import TextArea from "../TextArea";
 import Datepicker from "../Datepicker";
+import Label from "../Label";
 
 const TaskContent = () => {
 	const [isLoading, setIsLoading] = useState(true);
@@ -180,6 +181,9 @@ const TaskContent = () => {
 											editTodo({ ...item, description: e.target.value })
 										}
 									/>
+								</div>
+								<div className="flex gap-6">
+									<Label />
 								</div>
 							</div>
 						</AccordionItem>

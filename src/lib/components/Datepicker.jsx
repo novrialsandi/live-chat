@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const DatePicker = ({ value, onChange }) => {
 	const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -7,6 +7,8 @@ const DatePicker = ({ value, onChange }) => {
 		value ? new Date(value) : null
 	);
 	const [showCalendar, setShowCalendar] = useState(false);
+
+	const calendarRef = useRef(null);
 
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
@@ -59,6 +61,24 @@ const DatePicker = ({ value, onChange }) => {
 			new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
 		);
 	};
+
+	const handleClickOutside = (event) => {
+		if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+			setShowCalendar(false);
+		}
+	};
+
+	useEffect(() => {
+		if (showCalendar) {
+			document.addEventListener("mousedown", handleClickOutside);
+		} else {
+			document.removeEventListener("mousedown", handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [showCalendar]);
 
 	// Date selection handler
 	const handleDateClick = (day) => {
@@ -179,7 +199,10 @@ const DatePicker = ({ value, onChange }) => {
 					fill={value ? "#2F80ED" : "#4f4f4f"}
 				/>
 			</svg>
-			<div className="relative w-[193px] border border-primary-darkGray rounded">
+			<div
+				ref={calendarRef}
+				className="relative  w-[193px] border border-primary-darkGray rounded"
+			>
 				{/* Input field */}
 				<input
 					type="text"
