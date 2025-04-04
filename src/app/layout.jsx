@@ -1,7 +1,7 @@
 import { Lato } from "next/font/google";
 import "./globals.css";
 import Layout from "@/lib/layout/Layout";
-import Quicks from "@/lib/components/Quicks";
+import Quicks from "@/lib/components/Quicks/Quicks";
 
 const lato = Lato({
 	subsets: ["latin"],

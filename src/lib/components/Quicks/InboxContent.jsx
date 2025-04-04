@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TextInput from "./TextInput";
+import TextInput from "../TextInput";
 import Image from "next/image";
 
 const InboxContent = () => {

@@ -117,7 +117,7 @@ const Dropdown = ({
 
 			{isOpen && (
 				<div
-					className={`absolute text-nowrap w-[288px] translate-x-[50%] bg-white h-fit min-w-[140px]  overflow-auto rounded-lg border-[1px]  ${popupZIndexClass} ${
+					className={`absolute text-nowrap w-[288px] translate-x-[50%] bg-white h-fit min-w-[140px]  overflow-auto rounded-lg border border-primary-gray  ${popupZIndexClass} ${
 						popupPosition === "right" ? "right-1/2" : "left-0"
 					}`}
 					style={{
@@ -136,7 +136,7 @@ const Dropdown = ({
 										<button
 											className={`flex gap-2 p-2 font-bold text-primary-darkGray cursor-pointer ${
 												index !== items.length - 1
-													? "border-b border-primary-darkGray"
+													? "border-b border-primary-gray"
 													: ""
 											}`}
 											key={item.id}
