@@ -13,6 +13,7 @@ const TaskContent = () => {
 	const [createLoading, setCreateLoading] = useState(false);
 	const [todos, setTodos] = useState([]);
 	const [openDeleteMenuId, setOpenDeleteMenuId] = useState(null);
+	const [isFocused, setIsFocused] = useState(false);
 
 	const dropdownItem = [
 		{ id: 1, label: "Personal Errands", value: "personal" },
@@ -169,6 +170,8 @@ const TaskContent = () => {
 								</div>
 								<div className="flex gap-6">
 									<TextArea
+										isFocused={isFocused}
+										setIsFocused={setIsFocused}
 										isDescription={true}
 										value={item.description}
 										placeholder="No Description"

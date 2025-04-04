@@ -228,7 +228,7 @@ const DatePicker = ({ value, onChange }) => {
 						</div>
 
 						{/* Calendar grid */}
-						<table className="w-full border-collapse">
+						<table className="w-full border-collapse text-sm">
 							<thead>
 								<tr>
 									{daysOfWeek.map((day, index) => (
