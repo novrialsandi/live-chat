@@ -40,7 +40,7 @@ const InboxContent = () => {
 
 	setTimeout(() => {
 		setIsLoading(false);
-	}, 2000);
+	}, 1000);
 
 	return (
 		<div className="p-6 h-full flex flex-col ">

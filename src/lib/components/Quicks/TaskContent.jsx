@@ -132,7 +132,7 @@ const TaskContent = () => {
 				<div className="flex flex-col items-center gap-4 justify-center h-full">
 					<div className="size-[85.40695190429688px] border-8 border-[#F8F8F8] border-t-[#c4c4c4] rounded-full animate-spin"></div>
 					<div className="font-bold text-primary-darkGray">
-						Loading Chats...
+						Loading Tasks...
 					</div>
 				</div>
 			) : todos.length < 1 ? (

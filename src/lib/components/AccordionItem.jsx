@@ -60,7 +60,7 @@ const AccordionItem = ({
 					</div>
 				</div>
 
-				<div className="flex gap-3 text-sm pt-0.5 pr-8 font-normal">
+				<div className="flex gap-3 text-sm pt-0.5 pr-6 font-normal">
 					{data.date && (
 						<>
 							<div
