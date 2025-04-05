@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
+import { useClickOutside } from "../helpers/useClickOutside";
 
 const DatePicker = ({ value, onChange }) => {
 	const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -7,6 +8,7 @@ const DatePicker = ({ value, onChange }) => {
 		value ? new Date(value) : null
 	);
 	const [showCalendar, setShowCalendar] = useState(false);
+	const ref = useClickOutside(() => setShowCalendar(false));
 
 	const calendarRef = useRef(null);
 
@@ -61,24 +63,6 @@ const DatePicker = ({ value, onChange }) => {
 			new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
 		);
 	};
-
-	const handleClickOutside = (event) => {
-		if (calendarRef.current && !calendarRef.current.contains(event.target)) {
-			setShowCalendar(false);
-		}
-	};
-
-	useEffect(() => {
-		if (showCalendar) {
-			document.addEventListener("mousedown", handleClickOutside);
-		} else {
-			document.removeEventListener("mousedown", handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, [showCalendar]);
 
 	// Date selection handler
 	const handleDateClick = (day) => {
@@ -167,11 +151,6 @@ const DatePicker = ({ value, onChange }) => {
 		return rows;
 	};
 
-	// Toggle calendar visibility
-	const toggleCalendar = () => {
-		setShowCalendar(!showCalendar);
-	};
-
 	// Format the selected date (DD/MM/YYYY)
 	const formatDate = (date) => {
 		if (!date) return "";
@@ -208,20 +187,23 @@ const DatePicker = ({ value, onChange }) => {
 					type="text"
 					className=" h-10 px-4 w-full outline-0 placeholder-primary-darkGray"
 					value={formatDate(selectedDate)}
-					onClick={toggleCalendar}
+					onClick={() => setShowCalendar(!showCalendar)}
 					placeholder="Set Date"
 					readOnly
 				/>
 
 				<div
-					onClick={toggleCalendar}
+					onClick={() => setShowCalendar(!showCalendar)}
 					className="absolute right-4 top-1/2 transform -translate-y-1/2"
 				>
 					<Image src={"/icons/date.svg"} alt="date" height={16} width={16} />
 				</div>
 
 				{showCalendar && (
-					<div className="absolute top-12 z-10 -right-56 border border-primary-darkGray mt-1 bg-white rounded-lg p-4 w-64">
+					<div
+						ref={ref}
+						className="absolute top-12 z-10 -right-56 border border-primary-darkGray mt-1 bg-white rounded-lg p-4 w-64"
+					>
 						{/* Header with month/year and navigation */}
 						<div className="relative flex justify-between mb-2">
 							<button className="" onClick={handlePrevMonth}>

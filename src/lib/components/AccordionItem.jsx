@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import TextArea from "./TextArea";
+import { useClickOutside } from "../helpers/useClickOutside";
 
 const AccordionItem = ({
 	data,
@@ -12,40 +13,12 @@ const AccordionItem = ({
 	onToggleAccordion,
 }) => {
 	const [isFocused, setIsFocused] = useState(false);
+	const [openDeleteMenu, setOpenDeleteMenu] = useState(null);
+	const ref = useClickOutside(() => setOpenDeleteMenu(false));
 
 	const daysLeft = Math.ceil(
 		(new Date(data.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
 	);
-
-	// Refs for the menu components
-	const deleteMenuRef = useRef(null);
-	const [openDeleteMenu, setOpenDeleteMenu] = useState(null);
-
-	const handleClickOutside = (event) => {
-		if (
-			deleteMenuRef.current &&
-			!deleteMenuRef.current.contains(event.target)
-		) {
-			setOpenDeleteMenu(false);
-		}
-	};
-
-	useEffect(() => {
-		if (openDeleteMenu) {
-			document.addEventListener("mousedown", handleClickOutside);
-		} else {
-			document.removeEventListener("mousedown", handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, [openDeleteMenu]);
-
-	const handleMenuIconClick = (e) => {
-		e.stopPropagation();
-		setOpenDeleteMenu(true);
-	};
 
 	return (
 		<div className="border-b border-gray-300 text-primary-darkGray py-3">
@@ -108,12 +81,14 @@ const AccordionItem = ({
 						<Image src="/icons/down.svg" alt="quick" width={20} height={20} />{" "}
 					</motion.div>
 					<div
-						ref={deleteMenuRef}
 						className="relative cursor-pointer"
 						onClick={(e) => e.stopPropagation()}
 					>
 						<Image
-							onClick={handleMenuIconClick}
+							onClick={(e) => {
+								e.stopPropagation();
+								setOpenDeleteMenu(!openDeleteMenu);
+							}}
 							src="/icons/group-1910.svg"
 							alt="quick"
 							width={20}
@@ -122,6 +97,7 @@ const AccordionItem = ({
 
 						{openDeleteMenu && (
 							<button
+								ref={ref}
 								className="absolute text-indicator-red text-start w-[126px] h-[43px] right-0 top-6 bg-white border border-primary-gray px-4 z-10 rounded-md cursor-pointer"
 								onClick={() => {
 									onDelete(data.uuid);

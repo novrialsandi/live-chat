@@ -18,13 +18,14 @@
 	--color-chats-lightBlue: #d2f2ea;
 	--color-chats-green: #43b78d;
 
-	--color-stickers-lightBlue: #e9f3ff;
-	--color-stickers-softPeach: #fdcf A4;
+	--color-stickers-lightBlue: #e5f1ff;
+	--color-stickers-softPeach: #fdcfa4;
 	--color-stickers-softYellow: #f9e9c3;
 	--color-stickers-mint: #afebdb;
 	--color-stickers-lightGreen: #cbf1c2;
 	--color-stickers-lightLavender: #cfcef9;
 	--color-stickers-softPink: #f9e0fd;
+	--color-stickers-darkblue: #9dd0ed;
 }
 
 .scroll-wrapper {
