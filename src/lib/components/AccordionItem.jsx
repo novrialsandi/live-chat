@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import TextArea from "./TextArea";
@@ -115,13 +115,18 @@ const AccordionItem = ({
 				</div>
 			</div>
 
-			{/* Content */}
-			<motion.div
-				initial={false}
-				animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
-			>
-				<div className="px-4 py-2 pl-10 text-gray-600">{children}</div>
-			</motion.div>
+			<AnimatePresence>
+				{isOpen && (
+					<motion.div
+						initial={{ height: 0, opacity: 0 }}
+						animate={{ height: "auto", opacity: 1 }}
+						exit={{ height: 0, opacity: 0 }}
+						transition={{ duration: 0.3 }}
+					>
+						<div className="px-4 py-2 pl-10 text-gray-600">{children}</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 };
