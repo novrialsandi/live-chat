@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import TextArea from "./TextArea";
 import { useClickOutside } from "../helpers/useClickOutside";
 

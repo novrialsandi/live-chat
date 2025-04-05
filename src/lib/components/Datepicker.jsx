@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useClickOutside } from "../helpers/useClickOutside";
@@ -8,9 +10,11 @@ const DatePicker = ({ value, onChange }) => {
 		value ? new Date(value) : null
 	);
 	const [showCalendar, setShowCalendar] = useState(false);
-	const ref = useClickOutside(() => setShowCalendar(false));
-
+	const [showAbove, setShowAbove] = useState(false);
+	const inputRef = useRef(null);
 	const calendarRef = useRef(null);
+	const dropdownRef = useRef(null);
+	const ref = useClickOutside(() => setShowCalendar(false));
 
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
@@ -40,6 +44,23 @@ const DatePicker = ({ value, onChange }) => {
 			setCurrentMonth(new Date(value));
 		}
 	}, [value]);
+
+	// Check if calendar should be positioned above
+	useEffect(() => {
+		if (showCalendar && inputRef.current && dropdownRef.current) {
+			const inputRect = inputRef.current.getBoundingClientRect();
+			const dropdownHeight = dropdownRef.current.offsetHeight;
+			const viewportHeight = window.innerHeight;
+			const spaceBelow = viewportHeight - inputRect.bottom;
+
+			// Check if there's not enough space below
+			if (spaceBelow < dropdownHeight + 10) {
+				setShowAbove(true);
+			} else {
+				setShowAbove(false);
+			}
+		}
+	}, [showCalendar]);
 
 	// Get days in month
 	const getDaysInMonth = (year, month) => {
@@ -180,12 +201,13 @@ const DatePicker = ({ value, onChange }) => {
 			</svg>
 			<div
 				ref={calendarRef}
-				className="relative  w-[193px] border border-primary-darkGray rounded"
+				className="relative w-[193px] border border-primary-darkGray rounded"
 			>
 				{/* Input field */}
 				<input
+					ref={inputRef}
 					type="text"
-					className=" h-10 px-4 w-full outline-0 placeholder-primary-darkGray"
+					className="h-10 px-4 w-full outline-0 placeholder-primary-darkGray"
 					value={formatDate(selectedDate)}
 					onClick={() => setShowCalendar(!showCalendar)}
 					placeholder="Set Date"
@@ -201,8 +223,13 @@ const DatePicker = ({ value, onChange }) => {
 
 				{showCalendar && (
 					<div
-						ref={ref}
-						className="absolute top-12 z-10 -right-56 border border-primary-darkGray mt-1 bg-white rounded-lg p-4 w-64"
+						ref={(node) => {
+							ref.current = node;
+							dropdownRef.current = node;
+						}}
+						className={`absolute ${
+							showAbove ? "bottom-12" : "top-12 "
+						} z-10 -right-56 border border-primary-darkGray bg-white rounded-lg p-4 w-64`}
 					>
 						{/* Header with month/year and navigation */}
 						<div className="relative flex justify-between mb-2">

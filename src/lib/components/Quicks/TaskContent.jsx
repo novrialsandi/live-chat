@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import TextInput from "../TextInput";
-import Image from "next/image";
 import Button from "../Button";
 import Dropdown from "../Dropdown";
 import fetchApi from "../../api/fetchApi";
@@ -26,7 +24,7 @@ const TaskContent = () => {
 
 			const todosWithOpen = res.data.map((todo) => ({
 				...todo,
-				isOpen: true,
+				isOpen: todo.active !== false, // false jika active === false
 			}));
 
 			setTodos(todosWithOpen);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useClickOutside } from "../helpers/useClickOutside";
 
 const Label = () => {
@@ -50,7 +50,26 @@ const Label = () => {
 
 	const [openOption, setOpenOption] = useState(false);
 	const [selectedLabels, setSelectedLabels] = useState([]);
+	const [showAbove, setShowAbove] = useState(false);
+	const buttonRef = useRef(null);
+	const dropdownRef = useRef(null);
 	const ref = useClickOutside(() => setOpenOption(false));
+
+	useEffect(() => {
+		if (openOption && buttonRef.current && dropdownRef.current) {
+			const buttonRect = buttonRef.current.getBoundingClientRect();
+			const dropdownHeight = dropdownRef.current.offsetHeight;
+			const viewportHeight = window.innerHeight;
+			const spaceBelow = viewportHeight - buttonRect.bottom;
+
+			// Check if there's not enough space below
+			if (spaceBelow < dropdownHeight + 10) {
+				setShowAbove(true);
+			} else {
+				setShowAbove(false);
+			}
+		}
+	}, [openOption]);
 
 	const handleSelectLabel = (item) => {
 		const isSelected = selectedLabels.find((label) => label.id === item.id);
@@ -62,10 +81,11 @@ const Label = () => {
 	};
 
 	return (
-		<div className="relative min-h-12 py-2 w-full bg-[#f9f9f9] rounded-md ">
+		<div className="relative min-h-12 py-2 w-full bg-[#f9f9f9] rounded-md">
 			<button
+				ref={buttonRef}
 				onClick={() => setOpenOption(!openOption)}
-				className={`flex gap-6 items-center  h-full w-full  rounded-md text-primary-darkGray`}
+				className={`flex gap-6 items-center h-full w-full rounded-md text-primary-darkGray`}
 			>
 				<svg
 					className="w-5 h-5 min-w-[20px] min-h-[20px]"
@@ -102,10 +122,15 @@ const Label = () => {
 
 			{openOption && (
 				<div
-					ref={ref}
-					className="absolute mt-2 w-[277px] h-[323px] bg-white border border-primary-gray rounded-md z-10  shadow-md"
+					ref={(node) => {
+						ref.current = node;
+						dropdownRef.current = node;
+					}}
+					className={`absolute ${
+						showAbove ? "bottom-full" : "top-full"
+					} w-[277px] h-[323px] bg-white border border-primary-gray rounded-md z-10`}
 				>
-					<div className="flex flex-col justify-between h-full p-4  text-sm text-gray-700">
+					<div className="flex flex-col justify-between h-full p-4 text-sm text-gray-700">
 						{option.map((item) => {
 							const isSelected = selectedLabels.find(
 								(label) => label.id === item.id
