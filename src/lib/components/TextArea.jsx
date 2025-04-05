@@ -13,10 +13,12 @@ const TextArea = ({
 	debounceTime = null, // in milliseconds
 	onKeyDown = () => {},
 	onChange = () => {},
+	isChat = false,
 }) => {
 	const [value, setValue] = useState(initialValue);
 	const fieldRef = useRef(null);
 	const timerRef = useRef(null);
+	const [isFocusedText, setIsFocusedText] = useState(false);
 
 	useEffect(() => {
 		const textarea = fieldRef.current;
@@ -98,7 +100,11 @@ const TextArea = ({
 	};
 
 	return (
-		<div className={`flex gap-6 ${!value || isFocused ? "items-center" : ""}`}>
+		<div
+			className={`flex gap-6 ${
+				!value || isFocused || isFocusedText ? "items-center" : ""
+			}`}
+		>
 			{isDescription && (
 				<svg
 					onClick={() => fieldRef.current?.focus()} // focus on textarea
@@ -119,7 +125,9 @@ const TextArea = ({
 			)}
 			<div
 				className={`text-primary-darkGray ${
-					!value || isFocused
+					isChat
+						? "border-primary-gray w-[572px] border rounded-md py-2 px-[17.5px]"
+						: !value || isFocused || isFocusedText
 						? "border-primary-gray border rounded-md py-2 px-[17.5px]"
 						: ""
 				} flex flex-col space-y-2`}
@@ -135,12 +143,20 @@ const TextArea = ({
 					rows={1}
 					onKeyDown={onKeyDown}
 					onChange={handleChange}
-					onFocus={() => setIsFocused(true)}
-					onBlur={() => setIsFocused(false)}
+					onFocus={() => {
+						setIsFocused(true);
+						setIsFocusedText(true);
+					}}
+					onBlur={() => {
+						setIsFocused(false);
+						setIsFocusedText(false);
+					}}
 					className={`${className} flex
                         ${!active ? "line-through text-primary-gray" : ""} ${
 						isDescription
 							? "w-[543px] font-normal"
+							: isChat
+							? ""
 							: value
 							? "font-bold w-[346px]"
 							: "font-normal w-[346px]"

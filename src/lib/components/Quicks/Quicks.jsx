@@ -100,7 +100,12 @@ const Quicks = () => {
 					className={`absolute w-[734px] h-[737px] bg-white border rounded-lg border-[#BDBDBD] right-0 bottom-22 transform translate-x-[0%] translate-y-[0%]`}
 				>
 					{selectedItem === "Task" && <TaskContent />}
-					{selectedItem === "Inbox" && <InboxContent />}
+					{selectedItem === "Inbox" && (
+						<InboxContent
+							setSelectedItem={setSelectedItem}
+							setIsOpen={setIsOpen}
+						/>
+					)}
 				</div>
 			)}
 		</div>

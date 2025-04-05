@@ -1,9 +1,12 @@
 import { useState } from "react";
 import TextInput from "../TextInput";
 import Image from "next/image";
+import AllChat from "./Chats/AllChat";
+import RoomChat from "./Chats/RoomChat";
 
-const InboxContent = () => {
+const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 	const [isLoading, setIsLoading] = useState(true);
+	const [selectedChat, setSelectedChat] = useState(null);
 
 	const chats = [
 		{
@@ -43,8 +46,50 @@ const InboxContent = () => {
 	}, 1000);
 
 	return (
-		<div className="p-6 h-full flex flex-col ">
-			<TextInput placeholder="Search" hasIconRight />
+		<div className=" h-full flex flex-col ">
+			{selectedChat ? (
+				<div className="flex px-6 py-4 justify-between border-b border-[#bdbdbd] items-center ">
+					<div className="flex gap-4 items-center">
+						<button
+							className="cursor-pointer"
+							onClick={() => setSelectedChat(null)}
+						>
+							<Image
+								src="/icons/group-1920.svg"
+								alt="quick"
+								width={24}
+								height={24}
+								className="text-primary-blue"
+							/>
+						</button>
+						<div>
+							<div className="font-bold hover:underline text-primary-blue truncate max-w-[600px]">
+								{selectedChat.subject}
+							</div>
+							<div className="text-[#333333] text-sm">3 participans</div>
+						</div>
+					</div>
+					<button
+						className="cursor-pointer"
+						onClick={() => {
+							setSelectedItem(null);
+							setIsOpen(false);
+						}}
+					>
+						<Image
+							src="/icons/close_24px.svg"
+							alt="quick"
+							width={14}
+							height={14}
+							className="text-primary-blue m-1"
+						/>
+					</button>
+				</div>
+			) : (
+				<div className="px-8 pt-6">
+					<TextInput placeholder="Search" hasIconRight />
+				</div>
+			)}
 			{isLoading ? (
 				<div className="flex flex-col items-center gap-4 justify-center h-full">
 					<div className="size-[85.40695190429688px] border-8 border-[#F8F8F8] border-t-[#c4c4c4] rounded-full animate-spin"></div>
@@ -52,53 +97,19 @@ const InboxContent = () => {
 						Loading Chats...
 					</div>
 				</div>
+			) : selectedChat ? (
+				<RoomChat />
 			) : (
-				<div className="flex flex-col w-full h-full">
+				<div className="flex px-8 flex-col w-full h-full">
 					{chats.map((item, index) => {
 						return (
-							<div
+							<AllChat
+								onChange={() => setSelectedChat(item)}
+								item={item}
+								index={index}
+								chats={chats}
 								key={index}
-								className={`flex gap-4 py-[22px] ${
-									index !== chats.length - 1
-										? "border-b border-primary-gray"
-										: ""
-								}`}
-							>
-								<div className="relative flex flex-none h-[34px] w-[51px]">
-									<div className="size-[34px] absolute flex justify-center items-center rounded-full bg-primary-lightGray">
-										<Image
-											src="/icons/person_24px.svg"
-											alt="quick"
-											width={12}
-											height={12}
-										/>
-									</div>
-									<div className="size-[34px] absolute left-4 flex justify-center items-center rounded-full bg-primary-blue">
-										<Image
-											src="/icons/group-1607.svg"
-											alt="quick"
-											width={16}
-											height={16}
-										/>
-									</div>
-								</div>
-								<div>
-									<div className="flex gap-4">
-										<div className="text-primary-blue font-bold">
-											{item.subject}
-										</div>
-										<div className="text-primary-darkGray flex-none text-sm">
-											{item.date}
-										</div>
-									</div>
-									<div className="text-primary-darkGray font-bold text-sm">
-										{item.name} :
-									</div>
-									<div className="text-primary-darkGray text-sm">
-										{item.message}
-									</div>
-								</div>
-							</div>
+							/>
 						);
 					})}
 				</div>
