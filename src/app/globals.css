@@ -26,3 +26,34 @@
 	--color-stickers-lightLavender: #cfcef9;
 	--color-stickers-softPink: #f9e0fd;
 }
+
+.scroll-wrapper {
+	position: relative;
+	overflow: hidden;
+	padding-right: 12px; /* width of scrollbar + 5px offset */
+}
+
+.scroll-content {
+	height: 100%;
+	overflow-y: scroll;
+	margin-right: -8px; /* counteract padding to make room for scrollbar */
+	padding-right: 8px; /* prevent content from hiding under scrollbar */
+}
+
+/* Custom Scrollbar */
+.scroll-content::-webkit-scrollbar {
+	width: 8px;
+}
+
+.scroll-content::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.scroll-content::-webkit-scrollbar-thumb {
+	background: #bdbdbd;
+	border-radius: 8px;
+}
+
+.scroll-content::-webkit-scrollbar-button {
+	display: none;
+}

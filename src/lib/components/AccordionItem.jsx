@@ -10,9 +10,6 @@ const AccordionItem = ({
 	onEdit = () => {},
 	isOpen,
 	onToggleAccordion,
-	openDeleteMenu,
-	onToggleDeleteMenu,
-	onCloseDeleteMenu,
 }) => {
 	const [isFocused, setIsFocused] = useState(false);
 
@@ -22,57 +19,32 @@ const AccordionItem = ({
 
 	// Refs for the menu components
 	const deleteMenuRef = useRef(null);
-	const menuContainerRef = useRef(null);
-	const menuIconRef = useRef(null);
+	const [openDeleteMenu, setOpenDeleteMenu] = useState(null);
 
-	// Track click count and timing for double-click detection
-	const [lastClickTime, setLastClickTime] = useState(0);
+	const handleClickOutside = (event) => {
+		if (
+			deleteMenuRef.current &&
+			!deleteMenuRef.current.contains(event.target)
+		) {
+			setOpenDeleteMenu(false);
+		}
+	};
 
-	// Custom click outside handler that excludes the parent container
 	useEffect(() => {
-		function handleDocumentClick(e) {
-			// Only run this logic if delete menu is open
-			if (!openDeleteMenu) return;
-
-			// If the click is outside both the delete menu AND the parent container
-			if (
-				deleteMenuRef.current &&
-				!deleteMenuRef.current.contains(e.target) &&
-				menuContainerRef.current &&
-				!menuContainerRef.current.contains(e.target)
-			) {
-				onCloseDeleteMenu();
-			}
-		}
-
-		// Add event listener when delete menu is open
 		if (openDeleteMenu) {
-			document.addEventListener("mousedown", handleDocumentClick);
+			document.addEventListener("mousedown", handleClickOutside);
+		} else {
+			document.removeEventListener("mousedown", handleClickOutside);
 		}
 
-		// Clean up
 		return () => {
-			document.removeEventListener("mousedown", handleDocumentClick);
+			document.removeEventListener("mousedown", handleClickOutside);
 		};
-	}, [openDeleteMenu, onCloseDeleteMenu]);
+	}, [openDeleteMenu]);
 
 	const handleMenuIconClick = (e) => {
 		e.stopPropagation();
-		const currentTime = new Date().getTime();
-		const timeDiff = currentTime - lastClickTime;
-
-		// If the time between clicks is less than 300ms, consider it a double-click
-		if (timeDiff < 300) {
-			// On double-click, close the menu if it's open
-			if (openDeleteMenu) {
-				onCloseDeleteMenu();
-			}
-		} else {
-			// Single click behavior - toggle the menu
-			onToggleDeleteMenu();
-		}
-
-		setLastClickTime(currentTime);
+		setOpenDeleteMenu(true);
 	};
 
 	return (
@@ -136,22 +108,20 @@ const AccordionItem = ({
 						<Image src="/icons/down.svg" alt="quick" width={20} height={20} />{" "}
 					</motion.div>
 					<div
-						ref={menuContainerRef}
+						ref={deleteMenuRef}
 						className="relative cursor-pointer"
 						onClick={(e) => e.stopPropagation()}
 					>
-						<div ref={menuIconRef}>
-							<Image
-								onClick={handleMenuIconClick}
-								src="/icons/group-1910.svg"
-								alt="quick"
-								width={20}
-								height={20}
-							/>
-						</div>
+						<Image
+							onClick={handleMenuIconClick}
+							src="/icons/group-1910.svg"
+							alt="quick"
+							width={20}
+							height={20}
+						/>
+
 						{openDeleteMenu && (
 							<button
-								ref={deleteMenuRef}
 								className="absolute text-indicator-red text-start w-[126px] h-[43px] right-0 top-6 bg-white border border-primary-gray px-4 z-10 rounded-md cursor-pointer"
 								onClick={() => {
 									onDelete(data.uuid);

@@ -13,7 +13,6 @@ const TaskContent = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [createLoading, setCreateLoading] = useState(false);
 	const [todos, setTodos] = useState([]);
-	const [openDeleteMenuId, setOpenDeleteMenuId] = useState(null);
 	const [isFocused, setIsFocused] = useState(false);
 
 	const dropdownItem = [
@@ -61,7 +60,6 @@ const TaskContent = () => {
 		try {
 			await fetchApi.delete(`/todos/${uuid}`);
 			setTodos((prev) => prev.filter((item) => item.uuid !== uuid));
-			setOpenDeleteMenuId(null); // Close delete menu after deletion
 		} catch (error) {
 			console.log(error);
 		} finally {
@@ -93,21 +91,13 @@ const TaskContent = () => {
 		);
 	};
 
-	const handleDeleteMenuToggle = (uuid) => {
-		setOpenDeleteMenuId(openDeleteMenuId === uuid ? null : uuid);
-	};
-
-	const closeDeleteMenu = () => {
-		setOpenDeleteMenuId(null);
-	};
-
 	useEffect(() => {
 		getTodos();
 	}, []);
 
 	return (
-		<div className="p-6 h-full flex flex-col ">
-			<div className="flex w-full justify-between">
+		<div className="p-6 h-full flex flex-col scroll-wrapper">
+			<div className="flex w-full justify-between pr-4">
 				<div className="w-[289px] flex justify-center ">
 					<div className="w-fit">
 						<Dropdown
@@ -139,20 +129,15 @@ const TaskContent = () => {
 					<div className="font-bold text-primary-darkGray">No Todos Yet</div>
 				</div>
 			) : (
-				<div className="flex  flex-col w-full h-full">
+				<div className="flex scroll-content flex-col w-full h-full  overflow-y-auto gap-4">
 					{todos.map((item) => (
 						<AccordionItem
 							data={item}
-							setTodos={setTodos}
 							key={item.uuid}
 							onDelete={deleteTodo}
 							onEdit={editTodo}
 							isOpen={item.isOpen}
-							setOpenDeleteMenuId={setOpenDeleteMenuId}
 							onToggleAccordion={() => toggleAccordion(item.uuid)}
-							openDeleteMenu={openDeleteMenuId === item.uuid}
-							onToggleDeleteMenu={() => handleDeleteMenuToggle(item.uuid)}
-							onCloseDeleteMenu={closeDeleteMenu}
 						>
 							<div className="flex flex-col gap-2">
 								<div className="flex items-center gap-6">
@@ -169,14 +154,13 @@ const TaskContent = () => {
 										}
 									/>
 								</div>
-								<div className="flex gap-6">
+								<div className="flex gap-6 w-full">
 									<TextArea
 										isFocused={isFocused}
 										setIsFocused={setIsFocused}
 										isDescription={true}
 										value={item.description}
 										placeholder="No Description"
-										className={"w-543px"}
 										onChange={(e) =>
 											editTodo({ ...item, description: e.target.value })
 										}

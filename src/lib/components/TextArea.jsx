@@ -77,7 +77,7 @@ const TextArea = ({
 			<div
 				className={`text-primary-darkGray ${
 					!value || isFocused
-						? "border-primary-gray border rounded-md py-2 px-4"
+						? "border-primary-gray border rounded-md py-2 px-[17.5px]"
 						: ""
 				} flex flex-col space-y-2`}
 			>
