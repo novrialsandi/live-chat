@@ -71,7 +71,7 @@ const TaskContent = () => {
 		setCreateLoading(true);
 		try {
 			const res = await fetchApi.patch(`/todos/${newData.uuid}`, newData);
-			console.log(res.data);
+			console.log(res.data.active);
 			setTodos((prev) =>
 				prev.map((todo) =>
 					todo.uuid === res.data.uuid ? { ...todo, ...res.data } : todo
@@ -91,12 +91,12 @@ const TaskContent = () => {
 
 		const item = todos.find((todo) => todo.uuid === uuid);
 
-		console.log(item);
-
 		if (item) {
 			const { isOpen, ...cleanItem } = item;
 
-			if (newData.active !== undefined || newData.isOpen === false) {
+			if (newData.active !== undefined) {
+				editTodo({ uuid, ...cleanItem, active: newData.active });
+			} else if (newData.isOpen === false) {
 				editTodo(cleanItem);
 			}
 		}

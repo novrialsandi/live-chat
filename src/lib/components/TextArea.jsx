@@ -18,13 +18,56 @@ const TextArea = ({
 	const fieldRef = useRef(null);
 	const timerRef = useRef(null);
 
-	// Auto-resize effect
 	useEffect(() => {
 		const textarea = fieldRef.current;
-		if (textarea) {
-			textarea.style.height = "auto"; // Reset height
-			textarea.style.height = `${textarea.scrollHeight}px`; // Set new height
+		if (!textarea) return;
+
+		// Store original width to detect horizontal overflow
+		const originalWidth = textarea.offsetWidth;
+
+		// Store original styles before modifying
+		const originalStyles = {
+			height: textarea.style.height,
+			overflowY: textarea.style.overflowY,
+		};
+
+		// Reset to content height with hidden overflow
+		textarea.style.height = "auto";
+		textarea.style.overflowY = "hidden";
+
+		// Create a clone to test if content would overflow horizontally
+		const clone = textarea.cloneNode(true);
+		clone.style.position = "absolute";
+		clone.style.visibility = "hidden";
+		clone.style.height = "auto";
+		clone.style.width = originalWidth + "px";
+		clone.style.whiteSpace = "nowrap";
+		document.body.appendChild(clone);
+
+		// Check for horizontal overflow or line breaks
+		const wouldOverflow = clone.scrollWidth > originalWidth;
+		const hasLineBreaks = value.includes("\n");
+
+		// Get minimum height from CSS or default
+		const computedStyle = window.getComputedStyle(textarea);
+		const minHeight =
+			parseInt(computedStyle.minHeight) ||
+			parseInt(computedStyle.lineHeight) ||
+			20;
+
+		if (value === "" || (!wouldOverflow && !hasLineBreaks)) {
+			// Reset to minimum height when empty or no overflow
+			textarea.style.height = `${minHeight}px`;
+		} else {
+			// Set to content height when there's content that needs wrapping
+			textarea.style.height = `${textarea.scrollHeight}px`;
 		}
+
+		// Restore original overflow setting
+		textarea.style.overflowY = originalStyles.overflowY;
+
+		// Remove the clone
+		document.body.removeChild(clone);
 	}, [value]);
 
 	useEffect(() => {
@@ -99,8 +142,8 @@ const TextArea = ({
 						isDescription
 							? "w-[543px] font-normal"
 							: value
-							? "font-bold w-[340px]"
-							: "font-normal w-[340px]"
+							? "font-bold w-[346px]"
+							: "font-normal w-[346px]"
 					} resize-none outline-0 focus:border-active focus:ring-0 placeholder-primary-darkGray`}
 				/>
 			</div>

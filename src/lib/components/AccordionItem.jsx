@@ -31,11 +31,11 @@ const AccordionItem = ({
 			>
 				<div
 					className={`relative ${
-						data.title && !isFocused ? "items-start" : "items-center"
+						data.title && !isFocused ? "items-start " : "items-center"
 					} flex `}
 				>
 					<div
-						className="absolute left-0"
+						className="absolute left-0 pt-0.5"
 						onClick={(e) => {
 							onEdit(data.uuid, { active: !data.active });
 							e.stopPropagation();
@@ -60,7 +60,7 @@ const AccordionItem = ({
 					</div>
 				</div>
 
-				<div className="flex gap-3 text-sm pr-8 font-normal">
+				<div className="flex gap-3 text-sm pt-0.5 pr-8 font-normal">
 					{data.date && (
 						<>
 							<div
@@ -110,7 +110,7 @@ const AccordionItem = ({
 						{openDeleteMenu && (
 							<button
 								ref={ref}
-								className="absolute text-indicator-red text-start w-[126px] h-[43px] right-0 top-6 bg-white border border-primary-gray px-4 z-10 rounded-md cursor-pointer"
+								className="absolute hover:bg-primary-lightGray/40 text-indicator-red text-start w-[126px] h-[43px] right-0 top-6 bg-white border border-primary-gray px-4 z-10 rounded-md cursor-pointer"
 								onClick={() => {
 									onDelete(data.uuid);
 								}}
