@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useClickOutside } from "../helpers/useClickOutside";
 
-const Label = () => {
+const Label = ({ value = [], onChange }) => {
 	const option = [
 		{
 			id: 1,
@@ -48,6 +48,15 @@ const Label = () => {
 		},
 	];
 
+	const handleSelectLabel = (item) => {
+		const isSelected = value.find((label) => label.id === item.id);
+		if (isSelected) {
+			onChange(value.filter((label) => label.id !== item.id));
+		} else {
+			onChange([...value, item]);
+		}
+	};
+
 	const [openOption, setOpenOption] = useState(false);
 	const [selectedLabels, setSelectedLabels] = useState([]);
 	const [showAbove, setShowAbove] = useState(false);
@@ -70,15 +79,6 @@ const Label = () => {
 			}
 		}
 	}, [openOption]);
-
-	const handleSelectLabel = (item) => {
-		const isSelected = selectedLabels.find((label) => label.id === item.id);
-		if (isSelected) {
-			setSelectedLabels(selectedLabels.filter((label) => label.id !== item.id));
-		} else {
-			setSelectedLabels([...selectedLabels, item]);
-		}
-	};
 
 	return (
 		<div className="relative min-h-12 py-2 w-full bg-[#f9f9f9] rounded-md">
@@ -105,10 +105,10 @@ const Label = () => {
 				</svg>
 
 				<div className="flex flex-wrap gap-2">
-					{selectedLabels.length === 0 ? (
+					{value.length === 0 ? (
 						<div className="text-primary-darkGray">No label</div>
 					) : (
-						selectedLabels.map((label) => (
+						value.map((label) => (
 							<div
 								key={label.id}
 								className={`text-sm px-3 py-1 rounded ${label.color} font-medium`}
@@ -132,9 +132,7 @@ const Label = () => {
 				>
 					<div className="flex flex-col justify-between h-full p-4 text-sm text-gray-700">
 						{option.map((item) => {
-							const isSelected = selectedLabels.find(
-								(label) => label.id === item.id
-							);
+							const isSelected = value.find((label) => label.id === item.id);
 							return (
 								<div
 									key={item.id}

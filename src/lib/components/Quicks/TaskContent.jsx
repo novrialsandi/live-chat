@@ -81,6 +81,14 @@ const TaskContent = () => {
 		}
 	};
 
+	const handleLabelChange = (uuid, newLabels) => {
+		setTodos((prev) =>
+			prev.map((todo) =>
+				todo.uuid === uuid ? { ...todo, labels: newLabels } : todo
+			)
+		);
+	};
+
 	const toggleAccordion = (uuid) => {
 		setTodos((prev) =>
 			prev.map((todo) =>
@@ -165,7 +173,12 @@ const TaskContent = () => {
 									/>
 								</div>
 								<div className="flex gap-6">
-									<Label />
+									<Label
+										value={item.labels || []}
+										onChange={(newLabels) =>
+											handleLabelChange(item.uuid, newLabels)
+										}
+									/>
 								</div>
 							</div>
 						</AccordionItem>

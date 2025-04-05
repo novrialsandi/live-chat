@@ -60,7 +60,7 @@ const AccordionItem = ({
 					</div>
 				</div>
 
-				<div className="flex gap-3 text-sm pr-8">
+				<div className="flex gap-3 text-sm pr-8 font-normal">
 					{data.date && (
 						<>
 							<div
@@ -72,7 +72,9 @@ const AccordionItem = ({
 									? `${daysLeft} Day${daysLeft > 1 ? "s" : ""} Left`
 									: "Expired"}
 							</div>
-							<div>{new Date(data.date).toLocaleDateString("en-GB")}</div>{" "}
+							<div className="">
+								{new Date(data.date).toLocaleDateString("en-GB")}
+							</div>{" "}
 						</>
 					)}
 					<div className="cursor-pointer size-5" onClick={onToggleAccordion}>
