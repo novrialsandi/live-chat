@@ -129,7 +129,7 @@ const TaskContent = () => {
 					<div className="font-bold text-primary-darkGray">No Todos Yet</div>
 				</div>
 			) : (
-				<div className="flex scroll-content flex-col w-full h-full  overflow-y-auto">
+				<div className="flex scroll-content flex-col w-full h-full ">
 					{todos.map((item) => (
 						<AccordionItem
 							data={item}

@@ -13,12 +13,14 @@ const AccordionItem = ({
 	onToggleAccordion,
 }) => {
 	const [isFocused, setIsFocused] = useState(false);
-	const [openDeleteMenu, setOpenDeleteMenu] = useState(null);
-	const ref = useClickOutside(() => setOpenDeleteMenu(false));
 
 	const daysLeft = Math.ceil(
 		(new Date(data.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
 	);
+
+	// Refs for the menu components
+	const [openDeleteMenu, setOpenDeleteMenu] = useState(null);
+	const ref = useClickOutside(() => setOpenDeleteMenu(false));
 
 	return (
 		<div className="border-b border-gray-300 text-primary-darkGray py-3">
@@ -26,7 +28,6 @@ const AccordionItem = ({
 				className={` flex ${
 					data.title && !isFocused ? "items-start" : "items-center"
 				} justify-between py-2 text-left font-medium text-gray-800 transition`}
-				onClick={onToggleAccordion}
 			>
 				<div
 					className={`relative ${
@@ -74,12 +75,16 @@ const AccordionItem = ({
 							<div>{new Date(data.date).toLocaleDateString("en-GB")}</div>{" "}
 						</>
 					)}
-					<motion.div
-						animate={{ rotate: isOpen ? 180 : 0 }}
-						className="cursor-pointer size-5"
-					>
-						<Image src="/icons/down.svg" alt="quick" width={20} height={20} />{" "}
-					</motion.div>
+					<div className="cursor-pointer size-5" onClick={onToggleAccordion}>
+						<Image
+							className="duration-300 tranlatetion-all"
+							src="/icons/down.svg"
+							alt="expand"
+							width={20}
+							height={20}
+							style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+						/>
+					</div>
 					<div
 						className="relative cursor-pointer"
 						onClick={(e) => e.stopPropagation()}

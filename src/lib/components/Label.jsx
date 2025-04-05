@@ -48,16 +48,27 @@ const Label = () => {
 		},
 	];
 
-	const [openOption, setOpenOption] = useState(null);
+	const [openOption, setOpenOption] = useState(false);
+	const [selectedLabels, setSelectedLabels] = useState([]);
 	const ref = useClickOutside(() => setOpenOption(false));
 
+	const handleSelectLabel = (item) => {
+		const isSelected = selectedLabels.find((label) => label.id === item.id);
+		if (isSelected) {
+			setSelectedLabels(selectedLabels.filter((label) => label.id !== item.id));
+		} else {
+			setSelectedLabels([...selectedLabels, item]);
+		}
+	};
+
 	return (
-		<div className="relative h-12 w-full bg-[#f9f9f9] rounded-md ">
+		<div className="relative min-h-12 py-2 w-full bg-[#f9f9f9] rounded-md ">
 			<button
 				onClick={() => setOpenOption(!openOption)}
 				className={`flex gap-6 items-center  h-full w-full  rounded-md text-primary-darkGray`}
 			>
 				<svg
+					className="w-5 h-5 min-w-[20px] min-h-[20px]"
 					width="20"
 					height="20"
 					viewBox="0 0 29 31"
@@ -73,8 +84,19 @@ const Label = () => {
 					/>
 				</svg>
 
-				<div className={`text-primary-darkGray flex flex-col space-y-2`}>
-					<div>halo</div>
+				<div className="flex flex-wrap gap-2">
+					{selectedLabels.length === 0 ? (
+						<div className="text-primary-darkGray">No label</div>
+					) : (
+						selectedLabels.map((label) => (
+							<div
+								key={label.id}
+								className={`text-sm px-3 py-1 rounded ${label.color} font-medium`}
+							>
+								{label.label}
+							</div>
+						))
+					)}
 				</div>
 			</button>
 
@@ -84,16 +106,26 @@ const Label = () => {
 					className="absolute mt-2 w-[277px] h-[323px] bg-white border border-primary-gray rounded-md z-10  shadow-md"
 				>
 					<div className="flex flex-col justify-between h-full p-4  text-sm text-gray-700">
-						{option.map((item) => (
-							<div
-								key={item.id}
-								className={`flex ${item.color} items-center rounded-md px-4 py-1 cursor-pointer border border-transparent hover:border-primary-blue`}
-							>
-								<span className="text-primary-darkGray text-sm font-medium">
-									{item.label}
-								</span>
-							</div>
-						))}
+						{option.map((item) => {
+							const isSelected = selectedLabels.find(
+								(label) => label.id === item.id
+							);
+							return (
+								<div
+									key={item.id}
+									className={`flex ${
+										item.color
+									} items-center rounded-md px-4 py-1 cursor-pointer border ${
+										isSelected ? "border-primary-blue" : "border-transparent"
+									} hover:border-primary-blue`}
+									onClick={() => handleSelectLabel(item)}
+								>
+									<span className="text-primary-darkGray text-sm font-medium">
+										{item.label}
+									</span>
+								</div>
+							);
+						})}
 					</div>
 				</div>
 			)}
