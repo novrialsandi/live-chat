@@ -106,7 +106,7 @@ const Label = ({ value = [], onChange }) => {
 
 				<div className="flex flex-wrap gap-2">
 					{value.length === 0 ? (
-						<div className="text-primary-darkGray">No label</div>
+						<div className="text-primary-darkGray">No Label</div>
 					) : (
 						value.map((label) => (
 							<div
@@ -138,8 +138,10 @@ const Label = ({ value = [], onChange }) => {
 									key={item.id}
 									className={`flex ${
 										item.color
-									} items-center rounded-md px-4 py-1 cursor-pointer border ${
-										isSelected ? "border-primary-blue" : "border-transparent"
+									} items-center rounded-md px-4 py-1 cursor-pointer border-2 ${
+										isSelected
+											? "border-primary-blue border-2"
+											: "border-transparent"
 									} hover:border-primary-blue`}
 									onClick={() => handleSelectLabel(item)}
 								>

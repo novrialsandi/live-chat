@@ -22,10 +22,12 @@ const TaskContent = () => {
 		try {
 			const res = await fetchApi.get("/todos");
 
-			const todosWithOpen = res.data.map((todo) => ({
-				...todo,
-				isOpen: todo.active !== false, // false jika active === false
-			}));
+			const todosWithOpen = res.data
+				.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)) // ascending
+				.map((todo) => ({
+					...todo,
+					isOpen: todo.active !== false,
+				}));
 
 			setTodos(todosWithOpen);
 		} catch (error) {
@@ -65,13 +67,14 @@ const TaskContent = () => {
 		}
 	};
 
-	const editTodo = async (data) => {
+	const editTodo = async (newData) => {
 		setCreateLoading(true);
 		try {
-			// const res = await fetchApi.put(`/todos/${data.uuid}`, data);
+			const res = await fetchApi.patch(`/todos/${newData.uuid}`, newData);
+			console.log(res.data);
 			setTodos((prev) =>
-				prev.map((item) =>
-					item.uuid === data.uuid ? { ...item, ...data } : item
+				prev.map((todo) =>
+					todo.uuid === res.data.uuid ? { ...todo, ...res.data } : todo
 				)
 			);
 		} catch (error) {
@@ -81,20 +84,22 @@ const TaskContent = () => {
 		}
 	};
 
-	const handleLabelChange = (uuid, newLabels) => {
+	const handleChange = (uuid, newData) => {
 		setTodos((prev) =>
-			prev.map((todo) =>
-				todo.uuid === uuid ? { ...todo, labels: newLabels } : todo
-			)
+			prev.map((todo) => (todo.uuid === uuid ? { ...todo, ...newData } : todo))
 		);
-	};
 
-	const toggleAccordion = (uuid) => {
-		setTodos((prev) =>
-			prev.map((todo) =>
-				todo.uuid === uuid ? { ...todo, isOpen: !todo.isOpen } : todo
-			)
-		);
+		const item = todos.find((todo) => todo.uuid === uuid);
+
+		console.log(item);
+
+		if (item) {
+			const { isOpen, ...cleanItem } = item;
+
+			if (newData.active !== undefined || newData.isOpen === false) {
+				editTodo(cleanItem);
+			}
+		}
 	};
 
 	useEffect(() => {
@@ -140,10 +145,13 @@ const TaskContent = () => {
 						<AccordionItem
 							data={item}
 							key={item.uuid}
+							editTodo={editTodo}
 							onDelete={deleteTodo}
-							onEdit={editTodo}
+							onEdit={handleChange}
 							isOpen={item.isOpen}
-							onToggleAccordion={() => toggleAccordion(item.uuid)}
+							onToggleAccordion={() =>
+								handleChange(item.uuid, { isOpen: !item.isOpen })
+							}
 						>
 							<div className="flex flex-col gap-2">
 								<div className="flex items-center gap-6">
@@ -168,7 +176,7 @@ const TaskContent = () => {
 										value={item.description}
 										placeholder="No Description"
 										onChange={(e) =>
-											editTodo({ ...item, description: e.target.value })
+											handleChange(item.uuid, { description: e.target.value })
 										}
 									/>
 								</div>
@@ -176,7 +184,7 @@ const TaskContent = () => {
 									<Label
 										value={item.labels || []}
 										onChange={(newLabels) =>
-											handleLabelChange(item.uuid, newLabels)
+											handleChange(item.uuid, { labels: newLabels })
 										}
 									/>
 								</div>

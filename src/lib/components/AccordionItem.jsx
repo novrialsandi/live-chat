@@ -37,7 +37,7 @@ const AccordionItem = ({
 					<div
 						className="absolute left-0"
 						onClick={(e) => {
-							onEdit({ ...data, active: !data.active });
+							onEdit(data.uuid, { active: !data.active });
 							e.stopPropagation();
 						}}
 					>
@@ -55,7 +55,7 @@ const AccordionItem = ({
 							active={data.active}
 							value={data.title}
 							placeholder="Type Task Title"
-							onChange={(e) => onEdit({ ...data, title: e.target.value })}
+							onChange={(e) => onEdit(data.uuid, { title: e.target.value })}
 						/>
 					</div>
 				</div>
@@ -77,7 +77,12 @@ const AccordionItem = ({
 							</div>{" "}
 						</>
 					)}
-					<div className="cursor-pointer size-5" onClick={onToggleAccordion}>
+					<div
+						className="cursor-pointer size-5"
+						onClick={() => {
+							onToggleAccordion();
+						}}
+					>
 						<Image
 							className="duration-300 tranlatetion-all"
 							src="/icons/down.svg"
