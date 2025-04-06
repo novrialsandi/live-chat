@@ -1,8 +1,10 @@
 import Image from "next/image";
 import React, { useState } from "react";
+import { useClickOutside } from "@/lib/helpers/useClickOutside";
 
 const BubbleChat = ({ isMe, chat }) => {
 	const [openMenu, setOpenMenu] = useState();
+	const ref = useClickOutside(() => setOpenMenu(false));
 
 	const colors = [
 		{
@@ -68,18 +70,31 @@ const BubbleChat = ({ isMe, chat }) => {
 							height={20}
 							width={20}
 						/>
+						{openMenu && (
+							<div
+								ref={ref}
+								className={`absolute  ${
+									isMe ? "right-0" : ""
+								} top-6 w-32 bg-white border border-primary-darkGray rounded-md flex flex-col overflow-hidden z-10`}
+							>
+								{isMe ? (
+									<>
+										<button className="h-10 px-4 text-start text-primary-blue hover:bg-primary-lightGray">
+											Edit
+										</button>
+										<button className="h-10 px-4 text-start border-t border-primary-darkGray  text-indicator-red hover:bg-primary-lightGray">
+											Delete
+										</button>
+									</>
+								) : (
+									<button className="h-10 px-4 text-start hover:bg-primary-lightGray">
+										Reply
+									</button>
+								)}
+							</div>
+						)}
 					</div>
 
-					{openMenu && (
-						<div className="absolute  border bg-white rounded-md w-32 h-20 flex flex-col right-0 top-6">
-							<div className="h-full flex items-center rounded-t-md hover:bg-primary-lightGray">
-								<div className="px-4">Edit</div>
-							</div>
-							<div className="h-full flex items-center border-t rounded-b-md hover:bg-primary-lightGray">
-								<div className="px-4">Delete</div>
-							</div>
-						</div>
-					)}
 					<div className="text-primary-darkGray whitespace-pre-line ">
 						{chat.message}
 					</div>
