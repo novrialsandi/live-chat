@@ -126,7 +126,7 @@ const TextArea = ({
 			<div
 				className={`text-primary-darkGray ${
 					isChat
-						? "border-primary-gray w-[572px] border rounded-md py-2 px-[17.5px]"
+						? "border-primary-gray w-[592px] border rounded-md py-2 px-[17.5px]"
 						: !value || isFocused || isFocusedText
 						? "border-primary-gray border rounded-md py-2 px-[17.5px]"
 						: ""

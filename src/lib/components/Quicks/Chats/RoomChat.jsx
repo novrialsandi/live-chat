@@ -1,13 +1,150 @@
 import TextArea from "../../TextArea";
 import Button from "../../Button";
+import { useEffect, useRef, useState } from "react";
+import { getCookie, setCookie } from "@/lib/helpers/cookie";
+import fetchApi from "@/lib/api/fetchApi";
+import BubbleChat from "./BubbleChat";
+
+const randomId = Date.now().toString();
+const randomNumber = Math.floor(Math.random() * 90000) + 10000; // Generate 5-digit random number
+
+if (!getCookie("session")) {
+	setCookie("session", {
+		user_id: randomId,
+		name: `user_${randomNumber}`,
+	});
+}
 
 const RoomChat = () => {
+	const chatContainerRef = useRef(null);
+	const session = getCookie("session");
+	const [chats, setChats] = useState([]);
+	const [message, setMessage] = useState(() => {
+		return {
+			message: "",
+			user_id: session.user_id,
+			name: session.name,
+		};
+	});
+
+	const [loadingPost, setLoadingPost] = useState(false);
+	const [loadingRoom, setLoadingRoom] = useState(false);
+
+	const getChatRoom = async () => {
+		try {
+			setLoadingRoom(true);
+			const req = await fetchApi.get(`/chat-rooms/demo`);
+			setChats(req.data.messages);
+		} catch (error) {
+			console.error("API Error:", error);
+		} finally {
+			setLoadingRoom(false);
+		}
+	};
+
+	const postMessage = async () => {
+		try {
+			setLoadingPost(true);
+
+			const req = await fetchApi.post(`/chat-rooms/demo`, message);
+
+			setChats(req.data.chat_room.messages);
+			setMessage((prev) => ({ ...prev, message: "" }));
+		} catch (error) {
+			console.error("API Error:", error);
+		} finally {
+			setLoadingPost(false);
+		}
+	};
+
+	useEffect(() => {
+		getChatRoom();
+	}, []);
+
+	useEffect(() => {
+		if (chatContainerRef.current) {
+			chatContainerRef.current.scrollTop =
+				chatContainerRef.current.scrollHeight;
+		}
+	}, [chats]);
+
 	return (
-		<div className="h-full p-6 flex flex-col gap-4">
-			<div className="max-h-[554px] h-full">halo</div>
+		<div className="h-full p-4 scroll-wrapper flex flex-col gap-4">
+			<div
+				className=" scroll-content overflow-y-auto flex-col space-y-3 h-full"
+				ref={chatContainerRef}
+			>
+				{loadingRoom ? (
+					<div className="w-full h-full flex items-center  justify-center">
+						<div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+					</div>
+				) : chats.length > 0 ? (
+					chats.map((chat, index) => {
+						const isMe = chat.user_id === session.user_id;
+						const isNew = false;
+
+						// Get current chat date
+						const currentDate = new Date(chat.timestamp).toDateString();
+
+						// Get previous chat date (if it exists)
+						const previousDate =
+							index > 0
+								? new Date(chats[index - 1].timestamp).toDateString()
+								: null;
+
+						// Check if this is the first message of the day
+						const isFirstOfDay = index === 0 || currentDate !== previousDate;
+
+						return (
+							<div key={index}>
+								{/* Only show date separator if this is the first message of the day */}
+								{isFirstOfDay &&
+									(isNew ? (
+										<div className="h-3.5 px-2 flex items-center justify-between gap-8">
+											<div className="border-t w-full border-indicator-red"></div>
+											<div className="text-lg text-nowrap font-bold text-indicator-red">
+												New Message
+											</div>
+											<div className="border-t w-full border-indicator-red"></div>
+										</div>
+									) : (
+										<div className="h-3.5 px-2 flex items-center justify-between gap-8">
+											<div className="border-t w-full border-primary-darkGray"></div>
+											<div className="text-nowrap font-bold text-primary-darkGray">
+												{currentDate}
+											</div>
+											<div className="border-t w-full border-primary-darkGray"></div>
+										</div>
+									))}
+
+								<BubbleChat chat={chat} isMe={isMe} />
+							</div>
+						);
+					})
+				) : (
+					<p className="text-gray-400 h-full text-center flex items-center justify-center">
+						No messages yet.
+					</p>
+				)}
+			</div>
 			<div className="flex gap-4 items-end">
-				<TextArea isChat={true} />
-				<Button>Send</Button>
+				<TextArea
+					isChat={true}
+					value={message.message}
+					// onChange={(e) =>
+					// 	setMessage((prev) => ({
+					// 		...prev,
+					// 		message: e.target.value,
+					// 	}))
+					// }
+				/>
+				<Button
+					// onClick={() => postMessage()}
+					disabled={!message.message || loadingPost}
+					isLoading={loadingPost}
+				>
+					Send
+				</Button>
 			</div>
 		</div>
 	);
