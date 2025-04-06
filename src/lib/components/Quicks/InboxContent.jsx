@@ -43,7 +43,7 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 
 	setTimeout(() => {
 		setIsLoading(false);
-	}, 1000);
+	}, 100);
 
 	return (
 		<div className=" h-full flex flex-col ">
