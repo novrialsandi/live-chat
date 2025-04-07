@@ -45,6 +45,11 @@ const RoomChat = () => {
 
 		socketApi.emit("send_message", payload);
 
+		setMessage((prev) => ({
+			...prev,
+			message: "",
+		}));
+
 		setLoadingPost(false);
 	};
 
@@ -70,10 +75,8 @@ const RoomChat = () => {
 						const isMe = chat.user_id === session.user_id;
 						const isNew = false;
 
-						// Get current chat date
 						const currentDate = new Date(chat.createdAt).toDateString();
 
-						// Get previous chat date (if it exists)
 						const previousDate =
 							index > 0
 								? new Date(
@@ -81,12 +84,10 @@ const RoomChat = () => {
 								  ).toDateString()
 								: null;
 
-						// Check if this is the first message of the day
 						const isFirstOfDay = index === 0 || currentDate !== previousDate;
 
 						return (
 							<div key={index}>
-								{/* Only show date separator if this is the first message of the day */}
 								{isFirstOfDay &&
 									(isNew ? (
 										<div className="h-3.5 px-2 flex items-center justify-between gap-8">

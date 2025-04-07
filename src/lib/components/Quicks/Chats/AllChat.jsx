@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import dayjs from "dayjs";
 
 const AllChat = ({ item, rooms, index, onChange = () => {} }) => {
 	return (
@@ -35,13 +36,17 @@ const AllChat = ({ item, rooms, index, onChange = () => {} }) => {
 						{item?.name}
 					</div>
 					<div className="text-primary-darkGray flex-none text-sm">
-						{item?.date}
+						{dayjs(
+							item.chat_messages[item.chat_messages.length - 1]?.createdAt
+						).format("DD/MM/YYYY HH:mm")}
 					</div>
 				</div>
 				<div className="text-primary-darkGray font-bold text-sm">
-					{item?.name} :
+					{item.chat_messages[item.chat_messages.length - 1]?.name} :
 				</div>
-				<div className="text-primary-darkGray text-sm">{item?.message}</div>
+				<div className="text-primary-darkGray text-sm">
+					{item.chat_messages[item.chat_messages.length - 1]?.message}
+				</div>
 			</div>
 		</div>
 	);

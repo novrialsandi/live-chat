@@ -30,24 +30,30 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 		});
 
 		socketApi.on("receive_message", (newMsg) => {
-			// setRooms((prevRooms) =>
-			// 	prevRooms.map((room) => {
-			// 		if (room.chat_uuid === newMsg.chat_uuid) {
-			// 			// Append message to this room's chat_messages
-			// 			return {
-			// 				...room,
-			// 				chat_messages: [...room.chat_messages, newMsg],
-			// 			};
-			// 		}
-			// 		return room;
-			// 	})
-			// );
-			setSelectedChat((prevChat) => {
-				if (prevChat.uuid !== newMsg.chat_uuid) return prevChat;
-				return {
-					...prevChat,
-					chat_messages: [...prevChat.chat_messages, newMsg],
-				};
+			setRooms((prevRooms) => {
+				const updatedRooms = prevRooms.map((room) =>
+					room.uuid === newMsg.chat_uuid
+						? {
+								...room,
+								chat_messages: [...room.chat_messages, newMsg],
+						  }
+						: room
+				);
+
+				const updatedRoom = updatedRooms.find(
+					(room) => room.uuid === newMsg.chat_uuid
+				);
+
+				setSelectedChat((prevChat) =>
+					prevChat?.uuid === newMsg.chat_uuid && updatedRoom
+						? {
+								...prevChat,
+								chat_messages: [...updatedRoom.chat_messages],
+						  }
+						: prevChat
+				);
+
+				return updatedRooms;
 			});
 		});
 
@@ -105,6 +111,7 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 					<TextInput placeholder="Search" hasIconRight />
 				</div>
 			)}
+
 			{isLoading ? (
 				<div className="flex flex-col items-center gap-4 justify-center h-full">
 					<div className="size-[85.40695190429688px] border-8 border-[#F8F8F8] border-t-[#c4c4c4] rounded-full animate-spin"></div>
