@@ -2,8 +2,9 @@ import TextArea from "../../TextArea";
 import Button from "../../Button";
 import { useEffect, useRef, useState } from "react";
 import { getCookie, setCookie } from "@/lib/helpers/cookie";
-import fetchApi from "@/lib/api/fetchApi";
+import { useChatsStore } from "@/lib/stores/chats";
 import BubbleChat from "./BubbleChat";
+import fetchApi, { socketApi } from "@/lib/api/fetchApi";
 
 const randomId = Date.now().toString();
 const randomNumber = Math.floor(Math.random() * 90000) + 10000; // Generate 5-digit random number
@@ -16,9 +17,13 @@ if (!getCookie("session")) {
 }
 
 const RoomChat = () => {
+	const { selectedChat, setSelectedChat } = useChatsStore();
+
 	const chatContainerRef = useRef(null);
+	const [loadingPost, setLoadingPost] = useState(false);
+	const [loadingRoom, setLoadingRoom] = useState(false);
 	const session = getCookie("session");
-	const [chats, setChats] = useState([]);
+
 	const [message, setMessage] = useState(() => {
 		return {
 			message: "",
@@ -27,46 +32,28 @@ const RoomChat = () => {
 		};
 	});
 
-	const [loadingPost, setLoadingPost] = useState(false);
-	const [loadingRoom, setLoadingRoom] = useState(false);
+	const postMessage = () => {
+		const payload = {
+			chat_uuid: selectedChat.uuid,
+			message: message.message,
+			name: message.name,
+			user_id: message.user_id,
+			reply_id: null,
+		};
 
-	const getChatRoom = async () => {
-		try {
-			setLoadingRoom(true);
-			const req = await fetchApi.get(`/chat-rooms/demo`);
-			setChats(req.data.messages);
-		} catch (error) {
-			console.error("API Error:", error);
-		} finally {
-			setLoadingRoom(false);
-		}
+		setLoadingPost(true);
+
+		socketApi.emit("send_message", payload);
+
+		setLoadingPost(false);
 	};
-
-	const postMessage = async () => {
-		try {
-			setLoadingPost(true);
-
-			const req = await fetchApi.post(`/chat-rooms/demo`, message);
-
-			setChats(req.data.chat_room.messages);
-			setMessage((prev) => ({ ...prev, message: "" }));
-		} catch (error) {
-			console.error("API Error:", error);
-		} finally {
-			setLoadingPost(false);
-		}
-	};
-
-	useEffect(() => {
-		getChatRoom();
-	}, []);
 
 	useEffect(() => {
 		if (chatContainerRef.current) {
 			chatContainerRef.current.scrollTop =
 				chatContainerRef.current.scrollHeight;
 		}
-	}, [chats]);
+	}, [selectedChat.chat_messages]);
 
 	return (
 		<div className="h-full p-4 scroll-wrapper flex flex-col gap-4">
@@ -78,18 +65,20 @@ const RoomChat = () => {
 					<div className="w-full h-full flex items-center  justify-center">
 						<div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
 					</div>
-				) : chats.length > 0 ? (
-					chats.map((chat, index) => {
+				) : selectedChat.chat_messages.length > 0 ? (
+					selectedChat.chat_messages.map((chat, index) => {
 						const isMe = chat.user_id === session.user_id;
 						const isNew = false;
 
 						// Get current chat date
-						const currentDate = new Date(chat.timestamp).toDateString();
+						const currentDate = new Date(chat.createdAt).toDateString();
 
 						// Get previous chat date (if it exists)
 						const previousDate =
 							index > 0
-								? new Date(chats[index - 1].timestamp).toDateString()
+								? new Date(
+										selectedChat.chat_messages[index - 1].createdAt
+								  ).toDateString()
 								: null;
 
 						// Check if this is the first message of the day
@@ -131,15 +120,15 @@ const RoomChat = () => {
 				<TextArea
 					isChat={true}
 					value={message.message}
-					// onChange={(e) =>
-					// 	setMessage((prev) => ({
-					// 		...prev,
-					// 		message: e.target.value,
-					// 	}))
-					// }
+					onChange={(e) =>
+						setMessage((prev) => ({
+							...prev,
+							message: e.target.value,
+						}))
+					}
 				/>
 				<Button
-					// onClick={() => postMessage()}
+					onClick={postMessage}
 					disabled={!message.message || loadingPost}
 					isLoading={loadingPost}
 				>

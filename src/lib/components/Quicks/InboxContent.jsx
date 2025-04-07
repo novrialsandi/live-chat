@@ -1,49 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TextInput from "../TextInput";
 import Image from "next/image";
 import AllChat from "./Chats/AllChat";
 import RoomChat from "./Chats/RoomChat";
+import { socketApi } from "@/lib/api/fetchApi";
+import { useRoomStore, useChatsStore } from "@/lib/stores/chats";
 
 const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 	const [isLoading, setIsLoading] = useState(true);
-	const [selectedChat, setSelectedChat] = useState(null);
 
-	const chats = [
-		{
-			subject: "109220-Naturalization",
-			date: "January 1,2021 19:10",
-			name: "Cameron Phillips",
-			message: "Please check this out!",
-			group: true,
-		},
-		{
-			subject:
-				"Jeannette Moraima Guaman Chamba (Hutto I-589) [ Hutto Follow Up - Brief Service ]",
-			date: "02/06/2021 10:45",
-			name: "Ellen",
-			message: "Hey, please read.",
-			group: true,
-		},
-		{
-			subject: "8405-Diana SALAZAR MUNGUIA",
-			date: "01/06/2021 12:19",
-			name: "Cameron Phillips",
-			message:
-				"I understand your initial concerns and thats very valid, Elizabeth. But you ...",
-			group: true,
-		},
-		{
-			subject: "FastVisa Support",
-			date: "01/06/2021 12:19",
-			name: "",
-			message: "Hey there! Welcome to your inbox.",
-			group: false,
-		},
-	];
+	const { selectedChat, setSelectedChat } = useChatsStore();
+	const { rooms, setRooms } = useRoomStore();
 
-	setTimeout(() => {
-		setIsLoading(false);
-	}, 100);
+	useEffect(() => {
+		socketApi.connect();
+
+		setIsLoading(true);
+
+		socketApi.on("connect", () => {
+			setIsLoading(false);
+		});
+
+		socketApi.on("disconnect", () => {
+			setIsLoading(true);
+		});
+
+		socketApi.on("initial_chat_rooms", (initialRooms) => {
+			setRooms(initialRooms);
+		});
+
+		socketApi.on("receive_message", (newMsg) => {
+			// setRooms((prevRooms) =>
+			// 	prevRooms.map((room) => {
+			// 		if (room.chat_uuid === newMsg.chat_uuid) {
+			// 			// Append message to this room's chat_messages
+			// 			return {
+			// 				...room,
+			// 				chat_messages: [...room.chat_messages, newMsg],
+			// 			};
+			// 		}
+			// 		return room;
+			// 	})
+			// );
+			setSelectedChat((prevChat) => {
+				if (prevChat.uuid !== newMsg.chat_uuid) return prevChat;
+				return {
+					...prevChat,
+					chat_messages: [...prevChat.chat_messages, newMsg],
+				};
+			});
+		});
+
+		return () => {
+			socketApi.off("connect");
+			socketApi.off("disconnect");
+			socketApi.off("receive_message");
+			socketApi.off("initial_chat_rooms");
+			socketApi.disconnect();
+		};
+	}, []);
 
 	return (
 		<div className=" h-full flex flex-col ">
@@ -64,7 +79,7 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 						</button>
 						<div>
 							<div className="font-bold hover:underline text-primary-blue truncate max-w-[600px]">
-								{selectedChat.subject}
+								{selectedChat.name}
 							</div>
 							<div className="text-[#333333] text-sm">3 participans</div>
 						</div>
@@ -101,13 +116,13 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 				<RoomChat />
 			) : (
 				<div className="flex px-8 flex-col w-full h-full">
-					{chats.map((item, index) => {
+					{rooms.map((item, index) => {
 						return (
 							<AllChat
 								onChange={() => setSelectedChat(item)}
 								item={item}
 								index={index}
-								chats={chats}
+								rooms={rooms}
 								key={index}
 							/>
 						);
