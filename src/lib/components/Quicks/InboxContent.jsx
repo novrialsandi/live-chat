@@ -133,6 +133,8 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 		};
 	}, []);
 
+	console.log(selectedChat?.chat_messages);
+
 	return (
 		<div className=" h-full flex flex-col ">
 			{selectedChat ? (
