@@ -57,6 +57,73 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 			});
 		});
 
+		socketApi.on("delete_message", ({ message_id }) => {
+			setRooms((prevRooms) => {
+				const targetRoom = prevRooms.find((room) =>
+					room.chat_messages.some((msg) => msg.id === message_id)
+				);
+
+				if (!targetRoom) return prevRooms;
+
+				const updatedRooms = prevRooms.map((room) =>
+					room.uuid === targetRoom.uuid
+						? {
+								...room,
+								chat_messages: room.chat_messages.filter(
+									(msg) => msg.id !== message_id
+								),
+						  }
+						: room
+				);
+
+				setSelectedChat((prevChat) =>
+					prevChat && prevChat.uuid === targetRoom.uuid
+						? {
+								...prevChat,
+								chat_messages: prevChat.chat_messages.filter(
+									(msg) => msg.id !== message_id
+								),
+						  }
+						: prevChat
+				);
+
+				return updatedRooms;
+			});
+		});
+
+		socketApi.on("update_message", (updatedMsg) => {
+			setRooms((prevRooms) => {
+				const updatedRooms = prevRooms.map((room) => {
+					if (room.uuid !== updatedMsg.chat_uuid) return room;
+
+					const updatedMessages = room.chat_messages.map((msg) =>
+						msg.id === updatedMsg.id ? updatedMsg : msg
+					);
+
+					return {
+						...room,
+						chat_messages: updatedMessages,
+					};
+				});
+
+				// Update selectedChat jika sedang terbuka
+				const updatedRoom = updatedRooms.find(
+					(room) => room.uuid === updatedMsg.chat_uuid
+				);
+
+				setSelectedChat((prevChat) =>
+					prevChat?.uuid === updatedMsg.chat_uuid && updatedRoom
+						? {
+								...prevChat,
+								chat_messages: updatedRoom.chat_messages,
+						  }
+						: prevChat
+				);
+
+				return updatedRooms;
+			});
+		});
+
 		return () => {
 			socketApi.off("connect");
 			socketApi.off("disconnect");

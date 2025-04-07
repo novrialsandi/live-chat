@@ -17,7 +17,7 @@ if (!getCookie("session")) {
 }
 
 const RoomChat = () => {
-	const { selectedChat, setSelectedChat } = useChatsStore();
+	const { selectedChat, editMessage } = useChatsStore();
 
 	const chatContainerRef = useRef(null);
 	const [loadingPost, setLoadingPost] = useState(false);
@@ -33,6 +33,7 @@ const RoomChat = () => {
 	});
 
 	const postMessage = () => {
+		setLoadingPost(true);
 		const payload = {
 			chat_uuid: selectedChat.uuid,
 			message: message.message,
@@ -41,17 +42,32 @@ const RoomChat = () => {
 			reply_id: null,
 		};
 
-		setLoadingPost(true);
+		if (editMessage) {
+			socketApi.emit("edit_message", {
+				message_id: editMessage.id,
+				message: payload.message, // pastikan ini adalah teks terbaru
+			});
+		} else {
+			// Emit pesan baru
+			socketApi.emit("send_message", payload);
+		}
 
-		socketApi.emit("send_message", payload);
+		setLoadingPost(false);
 
 		setMessage((prev) => ({
 			...prev,
 			message: "",
 		}));
-
-		setLoadingPost(false);
 	};
+
+	useEffect(() => {
+		if (editMessage) {
+			setMessage((prev) => ({
+				...prev,
+				message: editMessage.message,
+			}));
+		}
+	}, [editMessage]);
 
 	useEffect(() => {
 		if (chatContainerRef.current) {

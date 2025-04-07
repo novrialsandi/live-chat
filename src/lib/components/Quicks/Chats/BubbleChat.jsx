@@ -1,47 +1,42 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import { useClickOutside } from "@/lib/helpers/useClickOutside";
+import { socketApi } from "@/lib/api/fetchApi";
+import { useChatsStore } from "@/lib/stores/chats";
 
 const BubbleChat = ({ isMe, chat }) => {
-	const [openMenu, setOpenMenu] = useState();
+	const [openMenu, setOpenMenu] = useState(false);
 	const ref = useClickOutside(() => setOpenMenu(false));
+	const { setEditMessage } = useChatsStore(); // 👈 Ambil setEditMessage
 
 	const colors = [
-		{
-			primary: "#eedcff",
-			bg: "#9b51e0",
-			isMe: true,
-		},
-		{
-			primary: "#d2f2ea",
-			bg: "#43b78d",
-		},
-		{
-			primary: "#fceed3",
-			bg: "#e5a443",
-		},
-		{
-			primary: "#d3e5ff",
-			bg: "#4a90e2",
-		},
-		{
-			primary: "#ffe6e6",
-			bg: "#eb5757",
-		},
-		{
-			primary: "#e0f7da",
-			bg: "#66bb6a",
-		},
+		{ primary: "#eedcff", bg: "#9b51e0", isMe: true },
+		{ primary: "#d2f2ea", bg: "#43b78d" },
+		{ primary: "#fceed3", bg: "#e5a443" },
+		{ primary: "#d3e5ff", bg: "#4a90e2" },
+		{ primary: "#ffe6e6", bg: "#eb5757" },
+		{ primary: "#e0f7da", bg: "#66bb6a" },
 	];
 
 	const getUserColor = (isMe, name) => {
 		if (isMe) return colors[0];
-
 		const hash = [...name].reduce((acc, char) => acc + char.charCodeAt(0), 0);
 		const index = (hash % (colors.length - 1)) + 1;
 		return colors[index];
 	};
+
 	const userColor = getUserColor(isMe, chat.name);
+
+	const handleEditMessage = () => {
+		setEditMessage(chat); // Set chat yang akan diedit ke global store
+		setOpenMenu(false);
+	};
+
+	const handleDeleteMessage = () => {
+		if (!chat.id) return;
+		socketApi.emit("delete_message", { message_id: chat.id });
+		setOpenMenu(false);
+	};
 
 	return (
 		<div
@@ -50,7 +45,7 @@ const BubbleChat = ({ isMe, chat }) => {
 			<div className="max-w-[70%]">
 				<div
 					style={{ color: userColor.bg }}
-					className={`${isMe ? "text-right" : ""}  font-bold`}
+					className={`${isMe ? "text-right" : ""} font-bold`}
 				>
 					{chat.name}
 				</div>
@@ -73,16 +68,22 @@ const BubbleChat = ({ isMe, chat }) => {
 						{openMenu && (
 							<div
 								ref={ref}
-								className={`absolute  ${
+								className={`absolute ${
 									isMe ? "right-0" : ""
 								} top-6 w-32 bg-white border border-primary-darkGray rounded-md flex flex-col overflow-hidden z-10`}
 							>
 								{isMe ? (
 									<>
-										<button className="h-10 px-4 text-start text-primary-blue hover:bg-primary-lightGray">
+										<button
+											onClick={handleEditMessage} // 👈 tambahkan handler
+											className="h-10 px-4 text-start text-primary-blue hover:bg-primary-lightGray"
+										>
 											Edit
 										</button>
-										<button className="h-10 px-4 text-start border-t border-primary-darkGray  text-indicator-red hover:bg-primary-lightGray">
+										<button
+											onClick={handleDeleteMessage}
+											className="h-10 px-4 text-start border-t border-primary-darkGray text-indicator-red hover:bg-primary-lightGray"
+										>
 											Delete
 										</button>
 									</>
@@ -95,7 +96,7 @@ const BubbleChat = ({ isMe, chat }) => {
 						)}
 					</div>
 
-					<div className="text-primary-darkGray whitespace-pre-line ">
+					<div className="text-primary-darkGray whitespace-pre-line">
 						{chat.message}
 					</div>
 					<div className="text-primary-darkGray text-sm">19.12</div>
