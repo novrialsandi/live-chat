@@ -7,7 +7,7 @@ import { useChatsStore } from "@/lib/stores/chats";
 const BubbleChat = ({ isMe, chat }) => {
 	const [openMenu, setOpenMenu] = useState(false);
 	const ref = useClickOutside(() => setOpenMenu(false));
-	const { setEditMessage } = useChatsStore(); // 👈 Ambil setEditMessage
+	const { setEditMessage } = useChatsStore();
 
 	const colors = [
 		{ primary: "#eedcff", bg: "#9b51e0", isMe: true },
@@ -28,7 +28,7 @@ const BubbleChat = ({ isMe, chat }) => {
 	const userColor = getUserColor(isMe, chat.name);
 
 	const handleEditMessage = () => {
-		setEditMessage(chat); // Set chat yang akan diedit ke global store
+		setEditMessage(chat);
 		setOpenMenu(false);
 	};
 

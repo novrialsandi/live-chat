@@ -45,10 +45,9 @@ const RoomChat = () => {
 		if (editMessage) {
 			socketApi.emit("edit_message", {
 				message_id: editMessage.id,
-				message: payload.message, // pastikan ini adalah teks terbaru
+				message: payload.message,
 			});
 		} else {
-			// Emit pesan baru
 			socketApi.emit("send_message", payload);
 		}
 

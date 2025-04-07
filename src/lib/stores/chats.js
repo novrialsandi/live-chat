@@ -21,7 +21,7 @@ export const useChatsStore = create((set) => ({
 					: chatDataOrUpdater,
 		})),
 
-	editMessage: null, // <-- Tambahkan ini
+	editMessage: null,
 	setEditMessage: (message) => set({ editMessage: message }),
 	clearEditMessage: () => set({ editMessage: null }),
 }));

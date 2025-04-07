@@ -3,6 +3,8 @@ import React from "react";
 import dayjs from "dayjs";
 
 const AllChat = ({ item, rooms, index, onChange = () => {} }) => {
+	console.log(item.chat_messages[item.chat_messages.length - 1]?.createdAt);
+
 	return (
 		<div
 			className={`flex gap-4 py-[22px] ${
