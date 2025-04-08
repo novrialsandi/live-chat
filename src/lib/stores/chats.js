@@ -26,4 +26,24 @@ export const useChatsStore = create((set) => ({
 
 	replyMessage: null,
 	setReplyMessage: (message) => set({ replyMessage: message }),
+
+	markMessageAsRead: (messageId, userId) =>
+		set((state) => {
+			const updatedMessages = state.selectedChat.chat_messages.map((msg) => {
+				if (msg.id === messageId && !msg.read_by.includes(userId)) {
+					return {
+						...msg,
+						read_by: [...msg.read_by, userId],
+					};
+				}
+				return msg;
+			});
+
+			return {
+				selectedChat: {
+					...state.selectedChat,
+					chat_messages: updatedMessages,
+				},
+			};
+		}),
 }));

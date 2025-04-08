@@ -7,7 +7,7 @@ import BubbleChat from "./BubbleChat";
 import fetchApi, { socketApi } from "@/lib/api/fetchApi";
 
 const randomId = Date.now().toString();
-const randomNumber = Math.floor(Math.random() * 90000) + 10000; // Generate 5-digit random number
+const randomNumber = Math.floor(Math.random() * 90000) + 10000;
 
 if (!getCookie("session")) {
 	setCookie("session", {
@@ -17,8 +17,13 @@ if (!getCookie("session")) {
 }
 
 const RoomChat = () => {
-	const { selectedChat, editMessage, replyMessage, setReplyMessage } =
-		useChatsStore();
+	const {
+		selectedChat,
+		editMessage,
+		replyMessage,
+		setReplyMessage,
+		markMessageAsRead,
+	} = useChatsStore();
 
 	const chatContainerRef = useRef(null);
 	const newMessageRef = useRef(null);
@@ -28,15 +33,13 @@ const RoomChat = () => {
 	const [showNewMessageButton, setShowNewMessageButton] = useState(false);
 	const session = getCookie("session");
 
-	const [message, setMessage] = useState(() => {
-		return {
-			message: "",
-			user_id: session.user_id,
-			name: session.name,
-		};
-	});
+	const [message, setMessage] = useState(() => ({
+		message: "",
+		user_id: session.user_id,
+		name: session.name,
+	}));
 
-	// console.log(selectedChat.chat_messages);
+	const [newMessageId, setNewMessageId] = useState(null);
 
 	const postMessage = () => {
 		setLoadingPost(true);
@@ -60,29 +63,17 @@ const RoomChat = () => {
 
 		setLoadingPost(false);
 		setReplyMessage(null);
-
-		setMessage((prev) => ({
-			...prev,
-			message: "",
-		}));
+		setMessage((prev) => ({ ...prev, message: "" }));
 	};
 
 	useEffect(() => {
 		if (editMessage) {
-			setMessage((prev) => ({
-				...prev,
-				message: editMessage.message,
-			}));
+			setMessage((prev) => ({ ...prev, message: editMessage.message }));
 		}
 	}, [editMessage]);
 
-	const firstUnreadIndex = selectedChat.chat_messages.findIndex(
-		(chat) => !chat.read_by.includes(session.user_id)
-	);
-
 	useEffect(() => {
 		const container = chatContainerRef.current;
-
 		if (!container || selectedChat.chat_messages.length === 0) return;
 
 		requestAnimationFrame(() => {
@@ -101,9 +92,8 @@ const RoomChat = () => {
 		const container = chatContainerRef.current;
 		if (!container || selectedChat.chat_messages.length === 0) return;
 
-		const lastMessage =
-			selectedChat.chat_messages[selectedChat.chat_messages.length - 1];
-		const isMe = lastMessage.user_id === session.user_id;
+		const lastMessage = selectedChat.chat_messages.at(-1);
+		const isMe = lastMessage?.user_id === session.user_id;
 
 		requestAnimationFrame(() => {
 			const isNearBottom =
@@ -118,23 +108,39 @@ const RoomChat = () => {
 		});
 	}, [selectedChat.chat_messages, session.user_id]);
 
+	useEffect(() => {
+		const lastMsg = selectedChat.chat_messages.at(-1);
+		if (!lastMsg) return;
+
+		const isUnread = !lastMsg.read_by.includes(session.user_id);
+		const isFromOthers = lastMsg.user_id !== session.user_id;
+
+		if (isUnread && isFromOthers) {
+			setNewMessageId(lastMsg.id);
+			setTimeout(() => {
+				setNewMessageId(null);
+			}, 5000);
+		}
+	}, [selectedChat.chat_messages, session.user_id]);
+
 	const handleScrollToBottom = () => {
 		if (chatContainerRef.current) {
 			chatContainerRef.current.scrollTop =
 				chatContainerRef.current.scrollHeight;
 			setShowNewMessageButton(false);
 
-			// Emit read_message untuk semua pesan yang belum dibaca
 			const unreadMessages = selectedChat.chat_messages.filter(
 				(msg) => !msg.read_by.includes(session.user_id)
 			);
 
 			if (unreadMessages.length > 0) {
-				unreadMessages.map((msg) => {
+				unreadMessages.forEach((msg) => {
 					socketApi.emit("read_message", {
 						message_id: msg.id,
 						user_id: session.user_id,
 					});
+
+					markMessageAsRead(msg.id, session.user_id);
 				});
 			}
 		}
@@ -157,17 +163,16 @@ const RoomChat = () => {
 
 					if (isNearBottom) {
 						setShowNewMessageButton(false);
-
 						const unreadMessages = selectedChat.chat_messages.filter(
 							(msg) => !msg.read_by.includes(session.user_id)
 						);
-
 						if (unreadMessages.length > 0) {
 							unreadMessages.forEach((msg) => {
 								socketApi.emit("read_message", {
 									message_id: msg.id,
 									user_id: session.user_id,
 								});
+								markMessageAsRead(msg.id, session.user_id);
 							});
 						}
 					}
@@ -180,7 +185,7 @@ const RoomChat = () => {
 				) : selectedChat.chat_messages.length > 0 ? (
 					selectedChat.chat_messages.map((chat, index) => {
 						const isMe = chat.user_id === session.user_id;
-						const isNew = index === firstUnreadIndex;
+						const isNew = chat.id === newMessageId;
 
 						const currentDate = new Date(chat.createdAt).toDateString();
 						const previousDate =
@@ -194,7 +199,6 @@ const RoomChat = () => {
 
 						return (
 							<div key={index}>
-								{/* New message indicator in chat */}
 								{isNew && (
 									<div
 										ref={newMessageRef}
@@ -208,7 +212,6 @@ const RoomChat = () => {
 									</div>
 								)}
 
-								{/* Date separator */}
 								{!isNew && isFirstOfDay && (
 									<div className="h-3.5 px-2 flex items-center justify-between gap-8">
 										<div className="border-t w-full border-primary-darkGray"></div>
@@ -230,7 +233,6 @@ const RoomChat = () => {
 				)}
 			</div>
 
-			{/* Sticky New Message button */}
 			{showNewMessageButton && (
 				<div className="fixed bottom-20 left-1/2 -translate-x-1/2">
 					<button
@@ -242,17 +244,13 @@ const RoomChat = () => {
 				</div>
 			)}
 
-			{/* Input area */}
 			<div className="flex gap-4 items-end">
 				<TextArea
 					isChat={true}
 					replyMessage={replyMessage}
 					value={message.message}
 					onChange={(e) =>
-						setMessage((prev) => ({
-							...prev,
-							message: e.target.value,
-						}))
+						setMessage((prev) => ({ ...prev, message: e.target.value }))
 					}
 				/>
 				<Button
