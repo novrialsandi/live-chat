@@ -21,6 +21,8 @@ const RoomChat = () => {
 		useChatsStore();
 
 	const chatContainerRef = useRef(null);
+	const newMessageRef = useRef(null);
+
 	const [loadingPost, setLoadingPost] = useState(false);
 	const [loadingRoom, setLoadingRoom] = useState(false);
 	const [showNewMessageButton, setShowNewMessageButton] = useState(false);
@@ -33,6 +35,8 @@ const RoomChat = () => {
 			name: session.name,
 		};
 	});
+
+	// console.log(selectedChat.chat_messages);
 
 	const postMessage = () => {
 		setLoadingPost(true);
@@ -78,21 +82,40 @@ const RoomChat = () => {
 
 	useEffect(() => {
 		const container = chatContainerRef.current;
+
+		if (!container || selectedChat.chat_messages.length === 0) return;
+
+		requestAnimationFrame(() => {
+			if (newMessageRef.current) {
+				newMessageRef.current.scrollIntoView({
+					behavior: "smooth",
+					block: "center",
+				});
+			} else {
+				container.scrollTop = container.scrollHeight;
+			}
+		});
+	}, []);
+
+	useEffect(() => {
+		const container = chatContainerRef.current;
 		if (!container || selectedChat.chat_messages.length === 0) return;
 
 		const lastMessage =
 			selectedChat.chat_messages[selectedChat.chat_messages.length - 1];
 		const isMe = lastMessage.user_id === session.user_id;
 
-		const isNearBottom =
-			container.scrollHeight - container.scrollTop - container.clientHeight <
-			100;
+		requestAnimationFrame(() => {
+			const isNearBottom =
+				container.scrollHeight - container.scrollTop - container.clientHeight <
+				100;
 
-		if (isNearBottom || isMe) {
-			container.scrollTop = container.scrollHeight;
-		} else {
-			setShowNewMessageButton(true);
-		}
+			if (isNearBottom || isMe) {
+				container.scrollTop = container.scrollHeight;
+			} else {
+				setShowNewMessageButton(true);
+			}
+		});
 	}, [selectedChat.chat_messages, session.user_id]);
 
 	const handleScrollToBottom = () => {
@@ -100,6 +123,20 @@ const RoomChat = () => {
 			chatContainerRef.current.scrollTop =
 				chatContainerRef.current.scrollHeight;
 			setShowNewMessageButton(false);
+
+			// Emit read_message untuk semua pesan yang belum dibaca
+			const unreadMessages = selectedChat.chat_messages.filter(
+				(msg) => !msg.read_by.includes(session.user_id)
+			);
+
+			if (unreadMessages.length > 0) {
+				unreadMessages.map((msg) => {
+					socketApi.emit("read_message", {
+						message_id: msg.id,
+						user_id: session.user_id,
+					});
+				});
+			}
 		}
 	};
 
@@ -120,6 +157,19 @@ const RoomChat = () => {
 
 					if (isNearBottom) {
 						setShowNewMessageButton(false);
+
+						const unreadMessages = selectedChat.chat_messages.filter(
+							(msg) => !msg.read_by.includes(session.user_id)
+						);
+
+						if (unreadMessages.length > 0) {
+							unreadMessages.forEach((msg) => {
+								socketApi.emit("read_message", {
+									message_id: msg.id,
+									user_id: session.user_id,
+								});
+							});
+						}
 					}
 				}}
 			>
@@ -146,7 +196,10 @@ const RoomChat = () => {
 							<div key={index}>
 								{/* New message indicator in chat */}
 								{isNew && (
-									<div className="h-3.5 px-2 flex items-center justify-between gap-8">
+									<div
+										ref={newMessageRef}
+										className="h-3.5 px-2 flex items-center justify-between gap-8"
+									>
 										<div className="border-t w-full border-indicator-red"></div>
 										<div className="text-lg text-nowrap font-bold text-indicator-red">
 											New Message
