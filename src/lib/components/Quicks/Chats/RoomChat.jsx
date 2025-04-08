@@ -23,6 +23,7 @@ const RoomChat = () => {
 	const chatContainerRef = useRef(null);
 	const [loadingPost, setLoadingPost] = useState(false);
 	const [loadingRoom, setLoadingRoom] = useState(false);
+	const [showNewMessageButton, setShowNewMessageButton] = useState(false);
 	const session = getCookie("session");
 
 	const [message, setMessage] = useState(() => {
@@ -71,30 +72,67 @@ const RoomChat = () => {
 		}
 	}, [editMessage]);
 
+	const firstUnreadIndex = selectedChat.chat_messages.findIndex(
+		(chat) => !chat.read_by.includes(session.user_id)
+	);
+
 	useEffect(() => {
+		const container = chatContainerRef.current;
+		if (!container || selectedChat.chat_messages.length === 0) return;
+
+		const lastMessage =
+			selectedChat.chat_messages[selectedChat.chat_messages.length - 1];
+		const isMe = lastMessage.user_id === session.user_id;
+
+		const isNearBottom =
+			container.scrollHeight - container.scrollTop - container.clientHeight <
+			100;
+
+		if (isNearBottom || isMe) {
+			container.scrollTop = container.scrollHeight;
+		} else {
+			setShowNewMessageButton(true);
+		}
+	}, [selectedChat.chat_messages, session.user_id]);
+
+	const handleScrollToBottom = () => {
 		if (chatContainerRef.current) {
 			chatContainerRef.current.scrollTop =
 				chatContainerRef.current.scrollHeight;
+			setShowNewMessageButton(false);
 		}
-	}, [selectedChat.chat_messages]);
+	};
 
 	return (
-		<div className="h-full p-4 scroll-wrapper flex flex-col gap-4">
+		<div className="h-full p-4 scroll-wrapper flex flex-col gap-4 relative">
 			<div
-				className=" scroll-content overflow-y-auto flex-col space-y-3 h-full"
+				className="scroll-content overflow-y-auto flex-col space-y-3 h-full"
 				ref={chatContainerRef}
+				onScroll={() => {
+					const container = chatContainerRef.current;
+					if (!container) return;
+
+					const isNearBottom =
+						container.scrollHeight -
+							container.scrollTop -
+							container.clientHeight <
+						100;
+
+					if (isNearBottom) {
+						setShowNewMessageButton(false);
+					}
+				}}
 			>
 				{loadingRoom ? (
-					<div className="w-full h-full flex items-center  justify-center">
+					<div className="w-full h-full flex items-center justify-center">
 						<div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
 					</div>
 				) : selectedChat.chat_messages.length > 0 ? (
 					selectedChat.chat_messages.map((chat, index) => {
 						const isMe = chat.user_id === session.user_id;
-						const isNew = false;
+						const isNew = index === firstUnreadIndex;
 
 						const currentDate = new Date(chat.createdAt).toDateString();
-
 						const previousDate =
 							index > 0
 								? new Date(
@@ -106,24 +144,27 @@ const RoomChat = () => {
 
 						return (
 							<div key={index}>
-								{isFirstOfDay &&
-									(isNew ? (
-										<div className="h-3.5 px-2 flex items-center justify-between gap-8">
-											<div className="border-t w-full border-indicator-red"></div>
-											<div className="text-lg text-nowrap font-bold text-indicator-red">
-												New Message
-											</div>
-											<div className="border-t w-full border-indicator-red"></div>
+								{/* New message indicator in chat */}
+								{isNew && (
+									<div className="h-3.5 px-2 flex items-center justify-between gap-8">
+										<div className="border-t w-full border-indicator-red"></div>
+										<div className="text-lg text-nowrap font-bold text-indicator-red">
+											New Message
 										</div>
-									) : (
-										<div className="h-3.5 px-2 flex items-center justify-between gap-8">
-											<div className="border-t w-full border-primary-darkGray"></div>
-											<div className="text-nowrap font-bold text-primary-darkGray">
-												{currentDate}
-											</div>
-											<div className="border-t w-full border-primary-darkGray"></div>
+										<div className="border-t w-full border-indicator-red"></div>
+									</div>
+								)}
+
+								{/* Date separator */}
+								{!isNew && isFirstOfDay && (
+									<div className="h-3.5 px-2 flex items-center justify-between gap-8">
+										<div className="border-t w-full border-primary-darkGray"></div>
+										<div className="text-nowrap font-bold text-primary-darkGray">
+											{currentDate}
 										</div>
-									))}
+										<div className="border-t w-full border-primary-darkGray"></div>
+									</div>
+								)}
 
 								<BubbleChat chat={chat} isMe={isMe} />
 							</div>
@@ -135,6 +176,20 @@ const RoomChat = () => {
 					</p>
 				)}
 			</div>
+
+			{/* Sticky New Message button */}
+			{showNewMessageButton && (
+				<div className="fixed bottom-20 left-1/2 -translate-x-1/2">
+					<button
+						onClick={handleScrollToBottom}
+						className="bg-[#E9F3FF] text-primary-blue px-4 py-2 rounded-md font-bold cursor-pointer transition"
+					>
+						New Message
+					</button>
+				</div>
+			)}
+
+			{/* Input area */}
 			<div className="flex gap-4 items-end">
 				<TextArea
 					isChat={true}
