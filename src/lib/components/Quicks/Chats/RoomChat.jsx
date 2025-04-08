@@ -2,7 +2,7 @@ import TextArea from "../../TextArea";
 import Button from "../../Button";
 import { useEffect, useRef, useState } from "react";
 import { getCookie, setCookie } from "@/lib/helpers/cookie";
-import { useChatsStore } from "@/lib/stores/chats";
+import { useChatsStore, useRoomStore } from "@/lib/stores/chats";
 import BubbleChat from "./BubbleChat";
 import fetchApi, { socketApi } from "@/lib/api/fetchApi";
 
@@ -19,11 +19,14 @@ if (!getCookie("session")) {
 const RoomChat = () => {
 	const {
 		selectedChat,
+		setSelectedChat,
 		editMessage,
 		replyMessage,
 		setReplyMessage,
 		markMessageAsRead,
 	} = useChatsStore();
+
+	const { setRooms } = useRoomStore();
 
 	const chatContainerRef = useRef(null);
 	const newMessageRef = useRef(null);
@@ -66,6 +69,51 @@ const RoomChat = () => {
 		setMessage((prev) => ({ ...prev, message: "" }));
 	};
 
+	const handleUnreadMessages = (unreadMessages) => {
+		if (unreadMessages.length === 0) return;
+
+		unreadMessages.forEach((msg) => {
+			socketApi.emit("read_message", {
+				message_id: msg.id,
+				user_id: session.user_id,
+			});
+			markMessageAsRead(msg.id, session.user_id);
+		});
+
+		setRooms((prevRooms) => {
+			const updatedRooms = prevRooms.map((room) =>
+				room.uuid === selectedChat.uuid
+					? {
+							...room,
+							chat_messages: selectedChat.chat_messages.map((msg) =>
+								unreadMessages.find((um) => um.id === msg.id)
+									? {
+											...msg,
+											read_by: [...msg.read_by, session.user_id],
+									  }
+									: msg
+							),
+					  }
+					: room
+			);
+
+			const updatedRoom = updatedRooms.find(
+				(room) => room.uuid === selectedChat.uuid
+			);
+
+			setSelectedChat((prevChat) =>
+				prevChat?.uuid === selectedChat.uuid && updatedRoom
+					? {
+							...prevChat,
+							chat_messages: [...updatedRoom.chat_messages],
+					  }
+					: prevChat
+			);
+
+			return updatedRooms;
+		});
+	};
+
 	useEffect(() => {
 		if (editMessage) {
 			setMessage((prev) => ({ ...prev, message: editMessage.message }));
@@ -105,6 +153,14 @@ const RoomChat = () => {
 			} else {
 				setShowNewMessageButton(true);
 			}
+
+			const isUnscrollable = container.scrollHeight <= container.clientHeight;
+			if (isUnscrollable) {
+				const unreadMessages = selectedChat.chat_messages.filter(
+					(msg) => !msg.read_by.includes(session.user_id)
+				);
+				handleUnreadMessages(unreadMessages);
+			}
 		});
 	}, [selectedChat.chat_messages, session.user_id]);
 
@@ -133,16 +189,7 @@ const RoomChat = () => {
 				(msg) => !msg.read_by.includes(session.user_id)
 			);
 
-			if (unreadMessages.length > 0) {
-				unreadMessages.forEach((msg) => {
-					socketApi.emit("read_message", {
-						message_id: msg.id,
-						user_id: session.user_id,
-					});
-
-					markMessageAsRead(msg.id, session.user_id);
-				});
-			}
+			handleUnreadMessages(unreadMessages);
 		}
 	};
 
@@ -166,15 +213,7 @@ const RoomChat = () => {
 						const unreadMessages = selectedChat.chat_messages.filter(
 							(msg) => !msg.read_by.includes(session.user_id)
 						);
-						if (unreadMessages.length > 0) {
-							unreadMessages.forEach((msg) => {
-								socketApi.emit("read_message", {
-									message_id: msg.id,
-									user_id: session.user_id,
-								});
-								markMessageAsRead(msg.id, session.user_id);
-							});
-						}
+						handleUnreadMessages(unreadMessages);
 					}
 				}}
 			>
@@ -241,6 +280,17 @@ const RoomChat = () => {
 					>
 						New Message
 					</button>
+				</div>
+			)}
+			{!selectedChat.group && (
+				<div className="fixed w-[700px] bottom-20 left-1/2 bg-[#E9F3FF] py-4 px-4 -translate-x-1/2 flex items-center gap-3 rounded-md shadow">
+					{/* Spinner */}
+					<div className="w-5 h-5 border-2 border-primary-blue border-t-transparent rounded-full animate-spin" />
+
+					{/* Teks */}
+					<span className="text-primary-darkGray">
+						Please wait while we connect you with one of our team ...
+					</span>
 				</div>
 			)}
 

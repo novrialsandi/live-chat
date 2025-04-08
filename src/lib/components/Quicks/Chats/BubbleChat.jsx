@@ -9,8 +9,12 @@ const BubbleChat = ({ isMe, chat }) => {
 	const ref = useClickOutside(() => setOpenMenu(false));
 	const { setEditMessage, setReplyMessage, selectedChat } = useChatsStore();
 
+	const SUPPORT_USER_ID = "1742031804209";
+	const isSupport = !selectedChat.group && chat.user_id === SUPPORT_USER_ID;
+
 	const colors = [
-		{ primary: "#eedcff", bg: "#9b51e0", isMe: true },
+		{ primary: "#eedcff", bg: "#9b51e0" },
+		{ primary: "#F8F8F8", bg: "#2F80ED" },
 		{ primary: "#d2f2ea", bg: "#43b78d" },
 		{ primary: "#fceed3", bg: "#e5a443" },
 		{ primary: "#d3e5ff", bg: "#4a90e2" },
@@ -18,14 +22,17 @@ const BubbleChat = ({ isMe, chat }) => {
 		{ primary: "#e0f7da", bg: "#66bb6a" },
 	];
 
-	const getUserColor = (isMe, name) => {
-		if (isMe) return colors[0];
+	const getUserColor = (name) => {
 		const hash = [...name].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-		const index = (hash % (colors.length - 1)) + 1;
+		const index = (hash % (colors.length - 2)) + 2;
 		return colors[index];
 	};
 
-	const userColor = getUserColor(isMe, chat.name);
+	const userColor = isSupport
+		? colors[1]
+		: isMe
+		? colors[0]
+		: getUserColor(chat.name);
 
 	const handleEditMessage = () => {
 		setEditMessage(chat);
@@ -52,7 +59,7 @@ const BubbleChat = ({ isMe, chat }) => {
 					style={{ color: userColor.bg }}
 					className={`${isMe ? "text-right" : ""} font-bold`}
 				>
-					{chat.name}
+					{isSupport ? "FastVisa Support" : isMe ? "You" : chat.name}
 				</div>
 
 				{chat.reply_id &&
