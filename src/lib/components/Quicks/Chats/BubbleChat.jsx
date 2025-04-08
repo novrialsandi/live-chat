@@ -43,10 +43,6 @@ const BubbleChat = ({ isMe, chat }) => {
 		setOpenMenu(false);
 	};
 
-	console.log(selectedChat);
-
-	// console.log(chat);
-
 	return (
 		<div
 			className={`flex w-full px-2 ${isMe ? "justify-end" : "justify-start"}`}
@@ -59,16 +55,34 @@ const BubbleChat = ({ isMe, chat }) => {
 					{chat.name}
 				</div>
 
-				{chat.reply_id && (
-					<div className="rounded-md bg-[#f2f2f2] border border-primary-lightGray px-2 py-1.5 relative mb-2">
-						<div className="text-primary-darkGray whitespace-pre-line">
-							{chat.message}
-						</div>
-					</div>
-				)}
+				{chat.reply_id &&
+					(() => {
+						const repliedMessage = selectedChat.chat_messages.find(
+							(msg) => msg.id == chat.reply_id
+						);
+
+						return (
+							<div className="rounded-md bg-[#f2f2f2] border border-primary-lightGray px-2 py-1.5 relative mb-2">
+								<div
+									className={`${
+										repliedMessage?.message
+											? "text-primary-darkGray"
+											: "text-indicator-red"
+									}  whitespace-pre-line`}
+								>
+									{repliedMessage?.message
+										? repliedMessage?.message
+										: "Message Deleted"}
+								</div>
+							</div>
+						);
+					})()}
+
 				<div
 					style={{ backgroundColor: userColor.primary }}
-					className="rounded-md px-2 py-1.5 relative space-y-1"
+					className={`rounded-md px-2 py-1.5 relative space-y-1 ${
+						chat.reply_id && isMe ? "ml-6" : chat.reply_id ? "mr-6" : ""
+					}`}
 				>
 					<div
 						className={`absolute ${
@@ -120,11 +134,15 @@ const BubbleChat = ({ isMe, chat }) => {
 							</div>
 						)}
 					</div>
-
 					<div className="text-primary-darkGray whitespace-pre-line">
 						{chat.message}
 					</div>
-					<div className="text-primary-darkGray text-sm">19.12</div>
+					<div className="text-primary-darkGray text-sm">
+						{new Date(chat.createdAt).toLocaleTimeString([], {
+							hour: "2-digit",
+							minute: "2-digit",
+						})}
+					</div>{" "}
 				</div>
 			</div>
 		</div>
