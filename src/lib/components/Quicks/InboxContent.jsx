@@ -9,7 +9,7 @@ import { useRoomStore, useChatsStore } from "@/lib/stores/chats";
 const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 	const [isLoading, setIsLoading] = useState(true);
 
-	const { selectedChat, setSelectedChat } = useChatsStore();
+	const { selectedChat, setSelectedChat, setReplyMessage } = useChatsStore();
 	const { rooms, setRooms } = useRoomStore();
 
 	useEffect(() => {
@@ -133,8 +133,6 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 		};
 	}, []);
 
-	console.log(selectedChat);
-
 	return (
 		<div className=" h-full flex flex-col ">
 			{selectedChat ? (
@@ -175,6 +173,7 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 						onClick={() => {
 							setSelectedItem(null);
 							setIsOpen(false);
+							setSelectedChat(null);
 						}}
 					>
 						<Image
@@ -206,7 +205,10 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 					{rooms.map((item, index) => {
 						return (
 							<AllChat
-								onChange={() => setSelectedChat(item)}
+								onChange={() => {
+									setSelectedChat(item);
+									setReplyMessage(null);
+								}}
 								item={item}
 								index={index}
 								rooms={rooms}

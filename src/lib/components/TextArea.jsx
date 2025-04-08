@@ -1,4 +1,6 @@
+import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
+import { useChatsStore } from "../stores/chats";
 
 const TextArea = ({
 	active = true,
@@ -14,11 +16,13 @@ const TextArea = ({
 	onKeyDown = () => {},
 	onChange = () => {},
 	isChat = false,
+	replyMessage = null,
 }) => {
 	const [value, setValue] = useState(initialValue);
 	const fieldRef = useRef(null);
 	const timerRef = useRef(null);
 	const [isFocusedText, setIsFocusedText] = useState(false);
+	const { setReplyMessage } = useChatsStore();
 
 	useEffect(() => {
 		const textarea = fieldRef.current;
@@ -126,12 +130,34 @@ const TextArea = ({
 			<div
 				className={`text-primary-darkGray ${
 					isChat
-						? "border-primary-gray w-[592px] border rounded-md py-2 px-[17.5px]"
+						? "border-primary-gray w-[592px] border rounded-md "
 						: !value || isFocused || isFocusedText
-						? "border-primary-gray border rounded-md py-2 px-[17.5px]"
+						? "border-primary-gray border rounded-md py-2 px-[17.5px] space-y-2"
 						: ""
-				} flex flex-col space-y-2`}
+				} flex flex-col `}
 			>
+				{isChat && replyMessage && (
+					<div className="relative bg-[#f2f2f2] rounded-t-md py-2 px-3 border-b">
+						<div className="absolute top-2 right-2">
+							<button
+								className="cursor-pointer"
+								onClick={() => {
+									setReplyMessage(null);
+								}}
+							>
+								<Image
+									src="/icons/close_24px.svg"
+									alt="quick"
+									width={14}
+									height={14}
+									className="text-primary-blue m-1"
+								/>
+							</button>
+						</div>
+						<div className="font-medium">Reply to {replyMessage.name}</div>
+						<div className="text-sm">{replyMessage.message}</div>
+					</div>
+				)}
 				<textarea
 					suppressHydrationWarning
 					id={id}
@@ -156,7 +182,7 @@ const TextArea = ({
 						isDescription
 							? "w-[543px] font-normal"
 							: isChat
-							? ""
+							? "mx-3 my-2"
 							: value
 							? "font-bold w-[346px]"
 							: "font-normal w-[346px]"

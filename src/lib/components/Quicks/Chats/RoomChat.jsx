@@ -17,7 +17,8 @@ if (!getCookie("session")) {
 }
 
 const RoomChat = () => {
-	const { selectedChat, editMessage } = useChatsStore();
+	const { selectedChat, editMessage, replyMessage, setReplyMessage } =
+		useChatsStore();
 
 	const chatContainerRef = useRef(null);
 	const [loadingPost, setLoadingPost] = useState(false);
@@ -34,12 +35,13 @@ const RoomChat = () => {
 
 	const postMessage = () => {
 		setLoadingPost(true);
+
 		const payload = {
 			chat_uuid: selectedChat.uuid,
 			message: message.message,
 			name: message.name,
 			user_id: message.user_id,
-			reply_id: null,
+			reply_id: replyMessage ? replyMessage.id : null,
 		};
 
 		if (editMessage) {
@@ -52,6 +54,7 @@ const RoomChat = () => {
 		}
 
 		setLoadingPost(false);
+		setReplyMessage(null);
 
 		setMessage((prev) => ({
 			...prev,
@@ -135,6 +138,7 @@ const RoomChat = () => {
 			<div className="flex gap-4 items-end">
 				<TextArea
 					isChat={true}
+					replyMessage={replyMessage}
 					value={message.message}
 					onChange={(e) =>
 						setMessage((prev) => ({

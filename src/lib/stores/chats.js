@@ -23,5 +23,7 @@ export const useChatsStore = create((set) => ({
 
 	editMessage: null,
 	setEditMessage: (message) => set({ editMessage: message }),
-	clearEditMessage: () => set({ editMessage: null }),
+
+	replyMessage: null,
+	setReplyMessage: (message) => set({ replyMessage: message }),
 }));

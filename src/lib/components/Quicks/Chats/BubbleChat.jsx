@@ -7,7 +7,7 @@ import { useChatsStore } from "@/lib/stores/chats";
 const BubbleChat = ({ isMe, chat }) => {
 	const [openMenu, setOpenMenu] = useState(false);
 	const ref = useClickOutside(() => setOpenMenu(false));
-	const { setEditMessage } = useChatsStore();
+	const { setEditMessage, setReplyMessage, selectedChat } = useChatsStore();
 
 	const colors = [
 		{ primary: "#eedcff", bg: "#9b51e0", isMe: true },
@@ -32,11 +32,20 @@ const BubbleChat = ({ isMe, chat }) => {
 		setOpenMenu(false);
 	};
 
+	const handleReplyMessage = () => {
+		setReplyMessage(chat);
+		setOpenMenu(false);
+	};
+
 	const handleDeleteMessage = () => {
 		if (!chat.id) return;
 		socketApi.emit("delete_message", { message_id: chat.id });
 		setOpenMenu(false);
 	};
+
+	console.log(selectedChat);
+
+	// console.log(chat);
 
 	return (
 		<div
@@ -49,6 +58,14 @@ const BubbleChat = ({ isMe, chat }) => {
 				>
 					{chat.name}
 				</div>
+
+				{chat.reply_id && (
+					<div className="rounded-md bg-[#f2f2f2] border border-primary-lightGray px-2 py-1.5 relative mb-2">
+						<div className="text-primary-darkGray whitespace-pre-line">
+							{chat.message}
+						</div>
+					</div>
+				)}
 				<div
 					style={{ backgroundColor: userColor.primary }}
 					className="rounded-md px-2 py-1.5 relative space-y-1"
@@ -75,7 +92,7 @@ const BubbleChat = ({ isMe, chat }) => {
 								{isMe ? (
 									<>
 										<button
-											onClick={handleEditMessage} // 👈 tambahkan handler
+											onClick={handleEditMessage}
 											className="h-10 px-4 text-start text-primary-blue hover:bg-primary-lightGray"
 										>
 											Edit
@@ -88,9 +105,17 @@ const BubbleChat = ({ isMe, chat }) => {
 										</button>
 									</>
 								) : (
-									<button className="h-10 px-4 text-start hover:bg-primary-lightGray">
-										Reply
-									</button>
+									<>
+										<button className="h-10 px-4 text-start text-primary-blue hover:bg-primary-lightGray">
+											Share
+										</button>
+										<button
+											onClick={handleReplyMessage}
+											className="h-10 px-4 text-start border-t border-primary-darkGray text-primary-blue hover:bg-primary-lightGray"
+										>
+											Reply
+										</button>
+									</>
 								)}
 							</div>
 						)}
