@@ -1,4 +1,3 @@
-// components/chat/Room/BubbleChatWrapper.jsx
 import { useEffect, useRef } from "react";
 import { socketApi } from "@/lib/api/fetchApi";
 import { getCookie } from "@/lib/helpers/cookie";
