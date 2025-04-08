@@ -70,7 +70,6 @@ const TaskContent = () => {
 		setCreateLoading(true);
 		try {
 			const res = await fetchApi.patch(`/todos/${newData.uuid}`, newData);
-			console.log(res.data.active);
 			setTodos((prev) =>
 				prev.map((todo) =>
 					todo.uuid === res.data.uuid ? { ...todo, ...res.data } : todo
