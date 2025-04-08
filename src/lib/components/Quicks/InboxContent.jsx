@@ -133,7 +133,7 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 		};
 	}, []);
 
-	console.log(selectedChat?.chat_messages);
+	console.log(selectedChat);
 
 	return (
 		<div className=" h-full flex flex-col ">
@@ -156,16 +156,18 @@ const InboxContent = ({ setSelectedItem, setIsOpen }) => {
 							<div className="font-bold hover:underline text-primary-blue truncate max-w-[600px]">
 								{selectedChat.name}
 							</div>
-							<div className="text-[#333333] text-sm">
-								{
-									[
-										...new Set(
-											selectedChat?.chat_messages.map((msg) => msg.user_id)
-										),
-									].length
-								}{" "}
-								participants
-							</div>
+							{selectedChat.group && (
+								<div className="text-[#333333] text-sm">
+									{
+										[
+											...new Set(
+												selectedChat?.chat_messages.map((msg) => msg.user_id)
+											),
+										].length
+									}{" "}
+									participants
+								</div>
+							)}
 						</div>
 					</div>
 					<button

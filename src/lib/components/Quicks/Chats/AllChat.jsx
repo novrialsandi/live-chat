@@ -10,21 +10,31 @@ const AllChat = ({ item, rooms, index, onChange = () => {} }) => {
 			}`}
 		>
 			<div className="relative flex flex-none h-[34px] w-[51px]">
-				<div className="size-[34px] absolute flex justify-center items-center rounded-full bg-primary-lightGray">
-					<Image
-						src="/icons/person_24px.svg"
-						alt="quick"
-						width={12}
-						height={12}
-					/>
-				</div>
-				<div className="size-[34px] absolute left-4 flex justify-center items-center rounded-full bg-primary-blue">
-					<Image
-						src="/icons/group-1607.svg"
-						alt="quick"
-						width={16}
-						height={16}
-					/>
+				{item.group && (
+					<div className="size-[34px] absolute flex justify-center items-center rounded-full bg-primary-lightGray">
+						<Image
+							src="/icons/person_24px.svg"
+							alt="quick"
+							width={12}
+							height={12}
+						/>
+					</div>
+				)}
+				<div
+					className={`size-[34px] absolute ${
+						item.group ? "left-4" : "left-2"
+					}  flex justify-center items-center rounded-full bg-primary-blue`}
+				>
+					{item.group ? (
+						<Image
+							src="/icons/group-1607.svg"
+							alt="quick"
+							width={16}
+							height={16}
+						/>
+					) : (
+						<div className="text-white">F</div>
+					)}
 				</div>
 			</div>
 			<div>
@@ -41,10 +51,12 @@ const AllChat = ({ item, rooms, index, onChange = () => {} }) => {
 						).format("DD/MM/YYYY HH:mm")}
 					</div>
 				</div>
-				<div className="text-primary-darkGray font-bold text-sm">
-					{item.chat_messages[item.chat_messages.length - 1]?.name} :
-				</div>
-				<div className="text-primary-darkGray text-sm">
+				{item.group && (
+					<div className="text-primary-darkGray font-bold text-sm">
+						{item.chat_messages[item.chat_messages.length - 1]?.name} :
+					</div>
+				)}
+				<div className="text-primary-darkGray text-sm truncate max-w-[450px]">
 					{item.chat_messages[item.chat_messages.length - 1]?.message}
 				</div>
 			</div>
