@@ -285,10 +285,10 @@ const RoomChat = () => {
 			{!selectedChat.group && (
 				<div className="fixed w-[700px] bottom-20 left-1/2 bg-[#E9F3FF] py-4 px-4 -translate-x-1/2 flex items-center gap-3 rounded-md shadow">
 					{/* Spinner */}
-					<div className="w-5 h-5 border-2 border-primary-blue border-t-transparent rounded-full animate-spin" />
+					<div className="w-7 h-7 border-3 border-primary-blue border-t-transparent rounded-full animate-spin" />
 
 					{/* Teks */}
-					<span className="text-primary-darkGray">
+					<span className="text-primary-darkGray text-sm font-medium">
 						Please wait while we connect you with one of our team ...
 					</span>
 				</div>

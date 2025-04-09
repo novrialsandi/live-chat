@@ -57,7 +57,7 @@ const BubbleChat = ({ isMe, chat }) => {
 			<div className="max-w-[70%]">
 				<div
 					style={{ color: userColor.bg }}
-					className={`${isMe ? "text-right" : ""} font-bold`}
+					className={`${isMe ? "text-right text-sm" : ""} font-bold`}
 				>
 					{isSupport ? "FastVisa Support" : isMe ? "You" : chat.name}
 				</div>
@@ -69,7 +69,7 @@ const BubbleChat = ({ isMe, chat }) => {
 						);
 
 						return (
-							<div className="rounded-md bg-[#f2f2f2] border border-primary-lightGray px-2 py-1.5 relative mb-2">
+							<div className="rounded-md text-sm bg-[#f2f2f2] border border-primary-lightGray px-2 py-1.5 relative mb-2">
 								<div
 									className={`${
 										repliedMessage?.message
@@ -87,7 +87,7 @@ const BubbleChat = ({ isMe, chat }) => {
 
 				<div
 					style={{ backgroundColor: userColor.primary }}
-					className={`rounded-md px-2 py-1.5 relative space-y-1 ${
+					className={`rounded-md p-2  relative space-y-1 ${
 						chat.reply_id && isMe ? "ml-6" : chat.reply_id ? "mr-6" : ""
 					}`}
 				>
@@ -141,10 +141,10 @@ const BubbleChat = ({ isMe, chat }) => {
 							</div>
 						)}
 					</div>
-					<div className="text-primary-darkGray whitespace-pre-line">
+					<div className="text-primary-darkGray whitespace-pre-line text-sm">
 						{chat.message}
 					</div>
-					<div className="text-primary-darkGray text-sm">
+					<div className="text-primary-darkGray text-[13px]">
 						{new Date(chat.createdAt).toLocaleTimeString([], {
 							hour: "2-digit",
 							minute: "2-digit",
